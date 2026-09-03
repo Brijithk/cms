@@ -2,6 +2,13 @@ from django.urls import path, include
 from . import views
 from rest_framework.routers import DefaultRouter
 from .views import ConsultationViewSet
+from .views import (
+    PrescribedMedicineListView,
+    PrescribedMedicineDetailView,
+    PrescribedMedicineByConsultationView,
+    BillListCreateView,
+    BillDetailView
+)
 
 
 router = DefaultRouter()
@@ -49,6 +56,31 @@ path(
     path("appointments/",views.AppointmentListCreateView.as_view()),
     path("appointments/<int:pk>/",views.AppointmentDetailView.as_view()),
 
+    path(
+    "prescribed-medicines/consultation/<int:consultation_id>/",
+    PrescribedMedicineByConsultationView.as_view(),
+    ),
+
     #other
     path("login/", views.LoginView.as_view()),
+
+    path(
+    "prescribed-medicines/",
+    PrescribedMedicineListView.as_view(),
+    ),
+
+    path(
+    "prescribed-medicines/<int:pk>/",
+    PrescribedMedicineDetailView.as_view(),
+    ),
+
+    path(
+    "bills/",
+    BillListCreateView.as_view()
+),
+
+path(
+    "bills/<int:pk>/",
+    BillDetailView.as_view()
+),
 ]

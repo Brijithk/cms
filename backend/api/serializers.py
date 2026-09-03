@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from doctor.models import Consultation,PrescribedLab,Doctor
+from doctor.models import Consultation,PrescribedLab,Doctor,Bill
 from administrator.models import UserProfile,Staff,Medicine,LabTest
 from receptionist.models import Patient,Appointment
 from doctor.models import ( Consultation, PrescribedLab, PrescribedMedicine )
@@ -105,28 +105,71 @@ class LabTestSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-
 class PrescribedMedicineSerializer(serializers.ModelSerializer):
+
+    patient_id = serializers.IntegerField(
+        source="consultation.patient_id",
+        read_only=True
+    )
+
+    doctor_id = serializers.CharField(
+        source="consultation.doctor_id",
+        read_only=True
+    )
+
+    consultation_id = serializers.IntegerField(
+        source="consultation.consultation_id",
+        read_only=True
+    )
 
     class Meta:
         model = PrescribedMedicine
-
         fields = [
             "prescription_id",
+            "consultation_id",
             "medicine_id",
             "medicine_name",
+            "price",
             "dosage",
             "morning",
             "afternoon",
             "night",
             "food_timing",
             "duration",
+            "patient_id",
+            "doctor_id",
+            "status",
         ]
 
-        read_only_fields = [
-            "prescription_id",
-            "medicine_name",
-        ]
+# class PrescribedMedicineSerializer(serializers.ModelSerializer):
+
+#     patient_id = serializers.IntegerField(
+#         source="consultation.patient_id",
+#         read_only=True
+#     )
+
+#     doctor_id = serializers.CharField(
+#         source="consultation.doctor_id",
+#         read_only=True
+#     )
+
+#     class Meta:
+#         model = PrescribedMedicine
+#         fields = [
+#             "prescription_id",
+#             "medicine_id",
+#             "medicine_name",
+#             "dosage",
+#             "morning",
+#             "afternoon",
+#             "night",
+#             "food_timing",
+#             "duration",
+#             "patient_id",
+#             "doctor_id",
+#             "status",
+#         ]
+
 # class PrescribedMedicineSerializer(serializers.ModelSerializer):
 
 #     class Meta:
@@ -202,6 +245,7 @@ class PrescribedLabSerializer(serializers.ModelSerializer):
     class Meta:
         model = PrescribedLab
 
+        
         fields = [
             "lab_prescription_id",
             "test_id",
@@ -211,6 +255,14 @@ class PrescribedLabSerializer(serializers.ModelSerializer):
             "doctor_id",
             "results",
             "technician_notes",
+            "report_date",
+        ]
+
+        read_only_fields = [
+            "lab_prescription_id",
+            "test_name",
+            "patient_id",
+            "doctor_id",
             "report_date",
         ]
 class ConsultationSerializer(serializers.ModelSerializer):
@@ -353,4 +405,41 @@ class ConsultationSerializer(serializers.ModelSerializer):
     #             )
 
     #         return consultation
+# class BillSerializer(serializers.ModelSerializer):
 
+#     consultation_id = serializers.PrimaryKeyRelatedField(
+#         source="consultation",
+#         queryset=Consultation.objects.all()
+#     )
+
+#     class Meta:
+#         model = Bill
+
+#         fields = [
+#             "bill_id",
+#             "consultation_id",
+#             "patient_id",
+#             "amount",
+#             "payment_status",
+#             "payment_method",
+#             "bill_date",
+#         ]
+class BillSerializer(serializers.ModelSerializer):
+
+    consultation_id = serializers.PrimaryKeyRelatedField(
+        source="consultation",
+        queryset=Consultation.objects.all()
+    )
+
+    class Meta:
+        model = Bill
+
+        fields = [
+            "bill_id",
+            "consultation_id",
+            "patient_id",
+            "amount",
+            "payment_status",
+            "payment_method",
+            "bill_date",
+        ]
