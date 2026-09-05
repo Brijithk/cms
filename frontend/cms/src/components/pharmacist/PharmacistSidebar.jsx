@@ -58,6 +58,17 @@ function PharmacistSidebar() {
                     <span>Billing</span>
                 </NavLink>
 
+   <NavLink
+                    to="/pharmacist/SalesReport"
+                    className={({ isActive }) =>
+                        isActive
+                            ? "pharmacist-menu-item active"
+                            : "pharmacist-menu-item"
+                    }
+                >
+                    <img src={patientsIcon} alt="" />
+                    <span>Sales Report</span>
+                </NavLink>
             </nav>
 
         </aside>

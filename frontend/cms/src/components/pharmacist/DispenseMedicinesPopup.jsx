@@ -906,12 +906,7 @@ const generateBill = (paymentMethod,
                                                 </td>
 
                                                 <td>
-                                                    ₹
-                                                    {
-                                                        getPrice(
-                                                            medicine.medicine_id
-                                                        )
-                                                    }
+                                                     ₹{Number(medicine.price || 0).toFixed(2)}
                                                 </td>
 
                                             </tr>
@@ -983,7 +978,7 @@ const generateBill = (paymentMethod,
             </span>
 
             <strong>
-                ₹{total.toFixed(2)}
+                ₹{totalAmount.toFixed(2)}
             </strong>
 
         </div>
@@ -1080,7 +1075,7 @@ const generateBill = (paymentMethod,
                 className="pay-btn"
                 onClick={handlePayment}
             >
-                Pay ₹{total.toFixed(2)}
+                Pay ₹{totalAmount.toFixed(2)}
             </button>
 
         </div>
@@ -1103,7 +1098,7 @@ const generateBill = (paymentMethod,
         </h3>
 
         <p>
-            ₹{total.toFixed(2)} paid successfully
+            ₹{totalAmount.toFixed(2)} paid successfully
         </p>
 
         <p>

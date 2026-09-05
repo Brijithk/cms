@@ -7,7 +7,11 @@ from .views import (
     PrescribedMedicineDetailView,
     PrescribedMedicineByConsultationView,
     BillListCreateView,
-    BillDetailView
+    BillDetailView,
+    DepartmentListCreateView,
+    DepartmentDetailView,
+    LabBillViewSet,
+    AppointmentBillViewSet
 )
 
 
@@ -17,6 +21,18 @@ router.register(
     r"consultations",
     ConsultationViewSet,
     basename="consultation"
+)
+
+router.register(
+    r"appointment-bills",
+    AppointmentBillViewSet,
+    basename="appointment-bill"
+)
+
+router.register(
+    r"lab-bills",
+    LabBillViewSet,
+    basename="lab-bill"
 )
 
 urlpatterns=[
@@ -83,4 +99,17 @@ path(
     "bills/<int:pk>/",
     BillDetailView.as_view()
 ),
+
+path(
+    "departments/",
+    DepartmentListCreateView.as_view(),
+    name="department-list-create"
+),
+
+path(
+    "departments/<str:department_id>/",
+    DepartmentDetailView.as_view(),
+    name="department-detail"
+),
+
 ]

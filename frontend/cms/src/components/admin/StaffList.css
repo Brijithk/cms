@@ -17,7 +17,19 @@
     margin-bottom: 15px;
 }
 
+.deactivate-button {
+    padding: 7px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
 
+.activate-button {
+    padding: 7px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
 /* =========================
    ADD STAFF BUTTON
    ========================= */

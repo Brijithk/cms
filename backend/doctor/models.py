@@ -251,20 +251,6 @@ class Doctor(models.Model):
         ("Other", "Other"),
     ]
 
-    DEPARTMENT_CHOICES = [
-        ("Cardiology", "Cardiology"),
-        ("Neurology", "Neurology"),
-        ("Orthopedics", "Orthopedics"),
-        ("Pediatrics", "Pediatrics"),
-        ("Dermatology", "Dermatology"),
-        ("General Medicine", "General Medicine"),
-        ("General Surgery", "General Surgery"),
-        ("Gynecology", "Gynecology"),
-        ("ENT", "ENT"),
-        ("Ophthalmology", "Ophthalmology"),
-        ("Dentistry", "Dentistry"),
-        ("Other", "Other"),
-    ]
 
     BLOOD_GROUP_CHOICES = [
         ("A+", "A+"),
@@ -293,8 +279,7 @@ class Doctor(models.Model):
 
     # Professional Information
     department = models.CharField(
-        max_length=50,
-        choices=DEPARTMENT_CHOICES
+        max_length=50
     )
 
     fees = models.DecimalField(
@@ -425,3 +410,75 @@ class Bill(models.Model):
 
     def __str__(self):
         return f"BILL{self.bill_id:03d}"
+
+class LabBill(models.Model):
+
+    PAYMENT_STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("paid", "Paid"),
+    ]
+
+    PAYMENT_METHOD_CHOICES = [
+        ("Cash", "Cash"),
+        ("UPI", "UPI"),
+        ("Card", "Card"),
+        ("Net Banking", "Net Banking"),
+    ]
+
+    lab_bill_id = models.AutoField(
+        primary_key=True
+    )
+
+    lab_prescription_id = models.IntegerField()
+
+    patient_id = models.IntegerField()
+
+    patient_name = models.CharField(
+        max_length=150
+    )
+
+    doctor_id = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True
+    )
+
+    doctor_name = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True
+    )
+
+    test_name = models.CharField(
+        max_length=150
+    )
+
+    description = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2
+    )
+
+    payment_status = models.CharField(
+        max_length=20,
+        choices=PAYMENT_STATUS_CHOICES,
+        default="paid"
+    )
+
+    payment_method = models.CharField(
+        max_length=30,
+        choices=PAYMENT_METHOD_CHOICES
+    )
+
+    bill_date = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return f"LAB{self.lab_bill_id:03d}"
+
+      

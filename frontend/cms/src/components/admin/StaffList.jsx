@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import "./StaffList.css";
 import AddStaff from "./AddStaff";
 import EditStaff from "./EditStaff";
-import { getStaff, deleteStaff } from "../../services/staffService";
+import { getStaff, deactivateStaff ,activateStaff} from "../../services/staffService";
 
 function StaffList() {
 
@@ -72,42 +72,79 @@ function StaffList() {
  const handleEditStaff = (member) => {
     setSelectedStaff(member);
 };
-   const handleDeleteStaff = async (member) => {
+ const handleDeactivateStaff = async (member) => {
 
-    const confirmDelete = window.confirm(
-        `Are you sure you want to delete ${member.name}?`
+    const confirmDeactivate = window.confirm(
+        `Are you sure you want to deactivate ${member.name}?`
     );
 
-    if (!confirmDelete) {
+    if (!confirmDeactivate) {
         return;
     }
 
     try {
 
-        await deleteStaff(member.id);
+        const updatedStaff = await deactivateStaff(member.id);
 
-        // Remove from UI after successful backend deletion
         setStaff((prevStaff) =>
-            prevStaff.filter(
-                (staffMember) => staffMember.id !== member.id
+            prevStaff.map((staffMember) =>
+                staffMember.id === member.id
+                    ? updatedStaff
+                    : staffMember
             )
         );
 
-        console.log("Staff deleted successfully");
+        console.log("Staff deactivated successfully");
 
     } catch (error) {
 
-        console.error("Error deleting staff:", error);
+        console.error(
+            "Error deactivating staff:",
+            error
+        );
 
-        if (error.response) {
-            console.log("Status:", error.response.status);
-            console.log("Response:", error.response.data);
-        }
+        console.log(
+            "Response:",
+            error.response?.data
+        );
 
-        alert("Failed to delete staff");
+        alert("Failed to deactivate staff");
     }
 };
+    const handleActivateStaff = async (member) => {
 
+    const confirmActivate = window.confirm(
+        `Are you sure you want to activate ${member.name}?`
+    );
+
+    if (!confirmActivate) {
+        return;
+    }
+
+    try {
+
+        const updatedStaff = await activateStaff(member.id);
+
+        setStaff((prevStaff) =>
+            prevStaff.map((staffMember) =>
+                staffMember.id === member.id
+                    ? updatedStaff
+                    : staffMember
+            )
+        );
+
+        console.log("Staff activated successfully");
+
+    } catch (error) {
+
+        console.error(
+            "Error activating staff:",
+            error
+        );
+
+        alert("Failed to activate staff");
+    }
+};
     return (
         <div className="staff-section">
 
@@ -223,14 +260,40 @@ function StaffList() {
                                                     Edit
                                                 </button>
 
-                                                <button
-                                                    className="delete-button"
-                                                    onClick={() =>
-                                                        handleDeleteStaff(member)
-                                                    }
-                                                >
-                                                    Delete
-                                                </button>
+                                               {/* <button
+    className="deactivate-button"
+    onClick={() =>
+        handleDeactivateStaff(member)
+    }
+    disabled={member.is_active === false}
+>
+    {member.is_active === false
+        ? "Inactive"
+        : "Deactivate"}
+</button> */}
+{member.is_active ? (
+
+    <button
+        className="deactivate-button"
+        onClick={() =>
+            handleDeactivateStaff(member)
+        }
+    >
+        Deactivate
+    </button>
+
+) : (
+
+    <button
+        className="activate-button"
+        onClick={() =>
+            handleActivateStaff(member)
+        }
+    >
+        Activate
+    </button>
+
+)}
 
                                             </div>
 

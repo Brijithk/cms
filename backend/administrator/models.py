@@ -52,9 +52,11 @@ class Staff(models.Model):
         ("O+", "O+"),
         ("O-", "O-"),
     ]
+    
     STATUS_CHOICES = [
     ("Active", "Active"),
     ("On Leave", "On Leave"),
+    ("Inactive", "Inactive"),
     ]
     # Staff ID
     staff_id = models.CharField(
@@ -109,7 +111,7 @@ class Staff(models.Model):
         blank=True,
         null=True
     )
-
+    is_active = models.BooleanField(default=True)
     # Login Information
     username = models.CharField(
         max_length=100,
@@ -275,7 +277,7 @@ class LabTest(models.Model):
         ("Maintenance", "Maintenance"),
     ],
     default="Available"
-)
+    )
 
     created_at = models.DateTimeField(
         auto_now_add=True
@@ -302,3 +304,42 @@ class LabTest(models.Model):
 
     def __str__(self):
         return f"{self.test_id} - {self.test_name}"
+
+class Department(models.Model):
+
+    department_id = models.CharField(
+        max_length=20,
+        unique=True,
+        editable=False
+    )
+
+    name = models.CharField(
+        max_length=100,
+        unique=True
+    )
+
+    description = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    is_active = models.BooleanField(
+        default=True
+    )
+
+    def save(self, *args, **kwargs):
+
+        if not self.department_id:
+            last_department = Department.objects.order_by("-id").first()
+
+            if last_department:
+                next_id = last_department.id + 1
+            else:
+                next_id = 1
+
+            self.department_id = f"DEP{next_id:03d}"
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name

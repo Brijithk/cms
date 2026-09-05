@@ -49,6 +49,8 @@ import ReceptionistAppointment from "./pages/Receptionist/ReceptionistAppointmen
 import ReceptionistBilling from "./pages/Receptionist/ReceptionistBilling";
 import AdminMedicineList from "./pages/Admin/AdminMedicineList";
 import AdminTestList from "./pages/Admin/AdminTestList";
+import AdminDepartmentList from "./pages/Admin/AdminDepartmentList";
+import SalesReport from "./pages/Pharmacist/SalesReport";
 function Dashboard() {
     return <h1>Doctor Dashboard</h1>;
 }
@@ -111,7 +113,11 @@ function App() {
         path="/admin/staff"
         element={<AdminStaffList />}
     />
-
+          
+            <Route
+        path="/admin/departmentList"
+        element={<AdminDepartmentList />}
+    />
        <Route
         path="/admin/medicines"
         element={<AdminMedicineList />}
@@ -157,7 +163,11 @@ function App() {
         path="/pharmacist/inventory"
         element={<Inventory />}
     />
-
+  
+   <Route
+        path="/pharmacist/SalesReport"
+        element={<SalesReport />}
+    />
      <Route
         path="/pharmacist/billing"
         element={<Billing />}

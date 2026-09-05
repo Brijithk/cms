@@ -228,44 +228,74 @@ function ConsultationPopup({
     /* SELECT MEDICINE */
     /* ============================= */
 
-    const handleMedicineSelect = (
-        index,
-        medicineId
-    ) => {
+    // const handleMedicineSelect = (
+    //     index,
+    //     medicineId
+    // ) => {
 
-        const selectedMedicine =
-            medicines.find(
-                (medicine) =>
-                    String(medicine.medicine_id) ===
-                    String(medicineId)
-            );
+    //     const selectedMedicine =
+    //         medicines.find(
+    //             (medicine) =>
+    //                 String(medicine.medicine_id) ===
+    //                 String(medicineId)
+    //         );
 
-        if (!selectedMedicine) {
-            return;
-        }
+    //     if (!selectedMedicine) {
+    //         return;
+    //     }
 
-        setPrescribedMedicines((prev) => {
+    //     setPrescribedMedicines((prev) => {
 
-            const updated = [...prev];
+    //         const updated = [...prev];
 
-            updated[index] = {
+    //         updated[index] = {
 
-                ...updated[index],
+    //             ...updated[index],
 
-                medicine_id:
-                    selectedMedicine.medicine_id,
+    //             medicine_id:
+    //                 selectedMedicine.medicine_id,
 
-                medicine_name:
-                    selectedMedicine.medicine_name
+    //             medicine_name:
+    //                 selectedMedicine.medicine_name
 
-            };
+    //         };
 
-            return updated;
+    //         return updated;
 
-        });
+    //     });
 
-    };
+    // };
+const handleMedicineSelect = (index, medicineId) => {
 
+    const selectedMedicine = medicines.find(
+        (medicine) =>
+            String(medicine.medicine_id) === String(medicineId)
+    );
+
+    if (!selectedMedicine) {
+        return;
+    }
+
+    setPrescribedMedicines((prev) => {
+
+        const updated = [...prev];
+
+        updated[index] = {
+            ...updated[index],
+
+            medicine_id:
+                selectedMedicine.medicine_id,
+
+            medicine_name:
+                selectedMedicine.medicine_name,
+
+            price:
+                Number(selectedMedicine.price || 0)
+        };
+
+        return updated;
+    });
+};
 
     /* ============================= */
     /* ADD TEST */

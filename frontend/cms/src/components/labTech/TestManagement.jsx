@@ -6,6 +6,8 @@ import TestResultPopup from "./TestResultPopup";
 //     updatePrescribedTestStatus,
 // } from "../../services/testService";
 import { getPrescribedTests,updatePrescribedTestStatus } from "../../services/prescribedTestService";
+import { createLabBill } from "../../services/labBillService";
+import LabBillPopup from "./LabBillPopup";
 function TestManagement1() {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedFilter, setSelectedFilter] = useState("All");
@@ -13,6 +15,7 @@ function TestManagement1() {
     const [tests, setTests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedTest, setSelectedTest] = useState(null);
+    const [generatedBill, setGeneratedBill] = useState(null);
 
     useEffect(() => {
         const loadTests = async () => {
@@ -254,45 +257,94 @@ function TestManagement1() {
 <TestResultPopup
     test={selectedTest}
     onClose={() => setSelectedTest(null)}
-    onComplete={async (test, results, notes) => {
-        try {
-            const updatedTest = await updatePrescribedTestStatus(
+
+  onGenerateBill={async (
+    test,
+    results,
+    notes,
+    paymentMethod
+) => {
+
+    try {
+
+        console.log("Test:", test);
+        console.log("Results:", results);
+        console.log("Notes:", notes);
+        console.log("Payment Method:", paymentMethod);
+
+        // 1. Complete the test
+        const updatedTest =
+            await updatePrescribedTestStatus(
                 test.lab_prescription_id,
                 "completed",
                 results,
                 notes
             );
 
-            console.log("UPDATED TEST:", updatedTest);
+        console.log(
+            "UPDATED TEST:",
+            updatedTest
+        );
 
-            setTests((prevTests) =>
-                prevTests.map((item) =>
-                    item.lab_prescription_id ===
-                    test.lab_prescription_id
-                        ? {
-                            ...item,
-                            ...updatedTest,
-                            status: "completed",
-                            results: results,
-                            technician_notes: notes
-                        }
-                        : item
-                )
-            );
 
-            setSelectedTest(null);
+        // 2. Update test list
+        setTests((prevTests) =>
+            prevTests.map((item) =>
+                item.lab_prescription_id ===
+                test.lab_prescription_id
+                    ? {
+                        ...item,
+                        ...updatedTest,
+                        status: "completed",
+                        results: results,
+                        technician_notes: notes
+                    }
+                    : item
+            )
+        );
 
-        } catch (error) {
 
-            console.error(
-                "Error completing test:",
-                error.response?.data || error
-            );
+        // 3. Create Lab Bill
+        const bill = await createLabBill({
+    lab_prescription_id: test.lab_prescription_id,
+    payment_method: paymentMethod
+});
 
-            alert("Failed to complete test.");
-        }
-    }}
+        console.log(
+            "LAB BILL CREATED:",
+            bill
+        );
+
+
+        // 4. Save bill for popup
+        setGeneratedBill(bill);
+
+
+        // 5. Close test result popup
+        setSelectedTest(null);
+
+
+    } catch (error) {
+
+        console.error(
+            "Error completing test and generating bill:",
+            error.response?.data || error
+        );
+
+        alert(
+            "Failed to complete test and generate bill."
+        );
+
+    }
+
+}}
 />
+)}
+{generatedBill && (
+    <LabBillPopup
+        bill={generatedBill}
+        onClose={() => setGeneratedBill(null)}
+    />
 )}
         </div>
     );

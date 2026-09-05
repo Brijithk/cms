@@ -211,3 +211,70 @@ class Appointment(models.Model):
 
     def __str__(self):
         return f"{self.appointment_id} - {self.patient_id} - {self.doctor_id}"
+
+class AppointmentBill(models.Model):
+
+    PAYMENT_STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("paid", "Paid"),
+    ]
+
+    PAYMENT_METHOD_CHOICES = [
+        ("Cash", "Cash"),
+        ("UPI", "UPI"),
+        ("Card", "Card"),
+        ("Net Banking", "Net Banking"),
+    ]
+
+    appointment = models.ForeignKey(
+        Appointment,
+        on_delete=models.CASCADE,
+        related_name="appointment_bills"
+    )
+
+    patient_id = models.IntegerField()
+
+    patient_name = models.CharField(
+        max_length=150
+    )
+
+    doctor_id = models.CharField(
+        max_length=20
+    )
+
+    doctor_name = models.CharField(
+        max_length=150
+    )
+
+    department = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True
+    )
+
+    appointment_type = models.CharField(
+        max_length=30
+    )
+
+    amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2
+    )
+
+    payment_status = models.CharField(
+        max_length=20,
+        choices=PAYMENT_STATUS_CHOICES,
+        default="paid"
+    )
+
+    payment_method = models.CharField(
+        max_length=30,
+        choices=PAYMENT_METHOD_CHOICES
+    )
+
+    bill_date = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return f"APPT-BILL{self.id:03d}"

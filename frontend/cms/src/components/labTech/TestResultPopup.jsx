@@ -59,41 +59,88 @@ const testParameters = {
     ],
 };
 
-function TestResultPopup({ test, onClose, onComplete }) {
+function TestResultPopup({
+    test,
+    onClose,
+    onGenerateBill
+}) {
+      
     const [results, setResults] = useState({});
     const [technicianNotes, setTechnicianNotes] = useState("");
+    const [paymentMethod, setPaymentMethod] = useState("");
+    const [loading, setLoading] = useState(false);
+    
 
     useEffect(() => {
+
         if (test) {
+
             setResults({});
             setTechnicianNotes("");
+            setPaymentMethod("");
+
         }
+
     }, [test]);
 
     if (!test) return null;
 
     const parameters =
-        testParameters[test.test_name] || testParameters["General"];
+        testParameters[test.test_name] ||
+        testParameters["General"];
 
     const handleResultChange = (parameter, value) => {
+
         setResults((prev) => ({
             ...prev,
             [parameter]: value,
         }));
+
     };
 
-    const handleComplete = () => {
-        console.log("Test Results:", results);
-        console.log("Technician Notes:", technicianNotes);
+    const handleGenerateBill = async () => {
 
-        onComplete(test, results, technicianNotes);
+        if (!paymentMethod) {
+            alert("Please select a payment method.");
+            return;
+        }
+
+        try {
+
+            setLoading(true);
+
+            await onGenerateBill(
+                test,
+                results,
+                technicianNotes,
+                paymentMethod
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Error generating bill:",
+                error
+            );
+
+        } finally {
+
+            setLoading(false);
+
+        }
+
     };
 
     return (
+
         <div className="test-popup-overlay">
+
             <div className="test-popup">
 
+                {/* Header */}
+
                 <div className="test-popup-header">
+
                     <h2>Test Details</h2>
 
                     <button
@@ -102,23 +149,44 @@ function TestResultPopup({ test, onClose, onComplete }) {
                     >
                         ×
                     </button>
+
                 </div>
+
+
+                {/* Test Information */}
 
                 <div className="test-info">
 
                     <div className="test-info-item">
-                        <label>Patient Name</label>
+
+                        <label>
+                            Patient Name
+                        </label>
+
                         <span>
-                            {test.patient_name || test.patient_id}
+                            {test.patient_name ||
+                                test.patient_id}
                         </span>
+
                     </div>
 
+
                     <div className="test-info-item">
-                        <label>Test Name</label>
-                        <span>{test.test_name}</span>
+
+                        <label>
+                            Test Name
+                        </label>
+
+                        <span>
+                            {test.test_name}
+                        </span>
+
                     </div>
 
                 </div>
+
+
+                {/* Parameters */}
 
                 <div className="test-parameters">
 
@@ -127,15 +195,21 @@ function TestResultPopup({ test, onClose, onComplete }) {
                     </h3>
 
                     {parameters.map((parameter) => (
+
                         <div
                             className="parameter-row"
                             key={parameter}
                         >
-                            <label>{parameter}</label>
+
+                            <label>
+                                {parameter}
+                            </label>
 
                             <input
                                 type="text"
-                                value={results[parameter] || ""}
+                                value={
+                                    results[parameter] || ""
+                                }
                                 onChange={(e) =>
                                     handleResultChange(
                                         parameter,
@@ -144,19 +218,28 @@ function TestResultPopup({ test, onClose, onComplete }) {
                                 }
                                 placeholder="Enter result"
                             />
+
                         </div>
+
                     ))}
 
                 </div>
 
+
+                {/* Technician Notes */}
+
                 <div className="technician-notes">
 
-                    <label>Technician Notes</label>
+                    <label>
+                        Technician Notes
+                    </label>
 
                     <textarea
                         value={technicianNotes}
                         onChange={(e) =>
-                            setTechnicianNotes(e.target.value)
+                            setTechnicianNotes(
+                                e.target.value
+                            )
                         }
                         placeholder="Enter technician notes..."
                         rows="4"
@@ -164,27 +247,79 @@ function TestResultPopup({ test, onClose, onComplete }) {
 
                 </div>
 
+
+                {/* Payment */}
+
+                <div className="test-payment-section">
+
+                    <label>
+                        Payment Method
+                    </label>
+
+                    <select
+                        value={paymentMethod}
+                        onChange={(e) =>
+                            setPaymentMethod(
+                                e.target.value
+                            )
+                        }
+                    >
+
+                        <option value="">
+                            Select Payment Method
+                        </option>
+
+                        <option value="Cash">
+                            Cash
+                        </option>
+
+                        <option value="Card">
+                            Card
+                        </option>
+
+                        <option value="UPI">
+                            UPI
+                        </option>
+
+                        <option value="Net Banking">
+                            Net Banking
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                {/* Actions */}
+
                 <div className="test-popup-actions">
 
                     <button
                         className="test-close-button"
                         onClick={onClose}
+                        disabled={loading}
                     >
                         Close
                     </button>
 
                     <button
                         className="test-complete-button"
-                        onClick={handleComplete}
+                        onClick={handleGenerateBill}
+                        disabled={loading}
                     >
-                        Complete Test
+                        {loading
+                            ? "Generating..."
+                            : "Generate Bill"}
                     </button>
 
                 </div>
 
             </div>
+
         </div>
+
     );
+
 }
 
 export default TestResultPopup;

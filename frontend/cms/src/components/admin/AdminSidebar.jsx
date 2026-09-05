@@ -70,6 +70,18 @@ function AdminSidebar() {
                     <img src={patientsIcon} alt="" />
                     <span>Lab Test List</span>
                 </NavLink>
+                
+                 <NavLink
+                    to="/admin/departmentList"
+                    className={({ isActive }) =>
+                        isActive
+                            ? "admin-menu-item active"
+                            : "admin-menu-item"
+                    }
+                >
+                    <img src={patientsIcon} alt="" />
+                    <span>Department List</span>
+                </NavLink>
             </nav>
 
         </aside>

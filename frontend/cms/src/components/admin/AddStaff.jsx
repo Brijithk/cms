@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import "./AddStaff.css";
 import { addStaff } from "../../services/staffService";
-
+import { getDepartments } from "../../services/departmentService";
 function AddStaff({ onClose, onStaffAdded }) {
 
     const [formData, setFormData] = useState({
@@ -22,7 +22,7 @@ function AddStaff({ onClose, onStaffAdded }) {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-
+    const [departments, setDepartments] = useState([]);
     const handleChange = (e) => {
 
         const { name, value } = e.target;
@@ -32,7 +32,28 @@ function AddStaff({ onClose, onStaffAdded }) {
             [name]: value
         }));
     };
+        useEffect(() => {
+    const fetchDepartments = async () => {
+        try {
+            const data = await getDepartments();
 
+            // Only active departments
+            const activeDepartments = data.filter(
+                (department) => department.is_active
+            );
+
+            setDepartments(activeDepartments);
+
+        } catch (error) {
+            console.error(
+                "Error fetching departments:",
+                error
+            );
+        }
+    };
+
+    fetchDepartments();
+}, []);
     const handleSubmit = async (e) => {
 
         e.preventDefault();

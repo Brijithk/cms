@@ -368,10 +368,10 @@
 
 // export default AddDoctor;
 
-import { useState } from "react";
+import { useState ,useEffect} from "react";
 import "./AddDoctor.css";
 import { addDoctor } from "../../services/doctorService";
-
+import { getDepartments } from "../../services/departmentService";
 function AddDoctor({ onClose, onDoctorAdded }) {
 
     const [formData, setFormData] = useState({
@@ -391,7 +391,7 @@ function AddDoctor({ onClose, onDoctorAdded }) {
     });
 
     const [loading, setLoading] = useState(false);
-
+   const [departments, setDepartments] = useState([]);
     const handleChange = (e) => {
 
         const { name, value } = e.target;
@@ -401,8 +401,53 @@ function AddDoctor({ onClose, onDoctorAdded }) {
             [name]: value
         });
     };
+//      useEffect(() => {
+//     const fetchDepartments = async () => {
+//         try {
+//             const data = await getDepartments();
 
-    const handleSubmit = async (e) => {
+//             const activeDepartments = data.filter(
+//                 (department) => department.is_active
+//             );
+
+//             setDepartments(activeDepartments);
+
+//         } catch (error) {
+//             console.error(
+//                 "Error fetching departments:",
+//                 error
+//             );
+//         }
+//     };
+
+//     fetchDepartments();
+// }, []);
+useEffect(() => {
+    const fetchDepartments = async () => {
+        try {
+            const data = await getDepartments();
+
+            console.log("DEPARTMENT API DATA:", data);
+
+            const activeDepartments = data.filter(
+                (department) => department.is_active === true
+            );
+
+            console.log("ACTIVE DEPARTMENTS:", activeDepartments);
+
+            setDepartments(activeDepartments);
+
+        } catch (error) {
+            console.error(
+                "Error fetching departments:",
+                error.response?.data || error
+            );
+        }
+    };
+
+    fetchDepartments();
+}, []);
+const handleSubmit = async (e) => {
 
         e.preventDefault();
 
@@ -479,66 +524,25 @@ function AddDoctor({ onClose, onDoctorAdded }) {
 
                             <label>Department</label>
 
-                            <select
-                                name="department"
-                                value={formData.department}
-                                onChange={handleChange}
-                                required
-                            >
+                          <select
+    name="department"
+    value={formData.department}
+    onChange={handleChange}
+    required
+>
+    <option value="">
+        Select Department
+    </option>
 
-                                <option value="">
-                                    Select department
-                                </option>
-
-                                <option value="Cardiology">
-                                    Cardiology
-                                </option>
-
-                                <option value="Neurology">
-                                    Neurology
-                                </option>
-
-                                <option value="Orthopedics">
-                                    Orthopedics
-                                </option>
-
-                                <option value="Pediatrics">
-                                    Pediatrics
-                                </option>
-
-                                <option value="Dermatology">
-                                    Dermatology
-                                </option>
-
-                                <option value="General Medicine">
-                                    General Medicine
-                                </option>
-
-                                <option value="General Surgery">
-                                    General Surgery
-                                </option>
-
-                                <option value="Gynecology">
-                                    Gynecology
-                                </option>
-
-                                <option value="ENT">
-                                    ENT
-                                </option>
-
-                                <option value="Ophthalmology">
-                                    Ophthalmology
-                                </option>
-
-                                <option value="Dentistry">
-                                    Dentistry
-                                </option>
-
-                                <option value="Other">
-                                    Other
-                                </option>
-
-                            </select>
+    {departments.map((department) => (
+        <option
+            key={department.department_id}
+            value={department.name}
+        >
+            {department.name}
+        </option>
+    ))}
+</select>
 
                         </div>
 

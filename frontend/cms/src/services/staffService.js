@@ -37,3 +37,26 @@ export const deleteStaff = async (id) => {
     return response.data;
 };
 
+export const deactivateStaff = async (id) => {
+    const response = await axios.patch(
+        `${API_URL}${id}/`,
+        {
+            is_active: false,
+            status: "Inactive"
+        }
+    );
+
+    return response.data;
+};
+
+export const activateStaff = async (id) => {
+    const response = await axios.patch(
+        `${API_URL}${id}/`,
+        {
+            is_active: true,
+            status: "Active"
+        }
+    );
+
+    return response.data;
+};

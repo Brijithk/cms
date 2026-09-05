@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from doctor.models import Consultation,PrescribedLab,Doctor,Bill
-from administrator.models import UserProfile,Staff,Medicine,LabTest
-from receptionist.models import Patient,Appointment
+from doctor.models import Consultation,PrescribedLab,Doctor,Bill,LabBill
+from administrator.models import UserProfile,Staff,Medicine,LabTest,Department
+from receptionist.models import Patient,Appointment,AppointmentBill
 from doctor.models import ( Consultation, PrescribedLab, PrescribedMedicine )
 # class ConsultationSerializer(serializers.ModelSerializer):
 #     class Meta:
@@ -232,27 +232,36 @@ class PrescribedLabSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
+    patient_name = serializers.SerializerMethodField()
+
     doctor_id = serializers.CharField(
         source="consultation.doctor_id",
         read_only=True
     )
 
+    doctor_name = serializers.SerializerMethodField()
+
     report_date = serializers.DateField(
-    source="consultation.consultation_date",
-    read_only=True
-     )  
+        source="consultation.consultation_date",
+        read_only=True
+    )
 
     class Meta:
         model = PrescribedLab
 
-        
         fields = [
             "lab_prescription_id",
             "test_id",
             "test_name",
+
             "status",
+
             "patient_id",
+            "patient_name",
+
             "doctor_id",
+            "doctor_name",
+
             "results",
             "technician_notes",
             "report_date",
@@ -262,9 +271,40 @@ class PrescribedLabSerializer(serializers.ModelSerializer):
             "lab_prescription_id",
             "test_name",
             "patient_id",
+            "patient_name",
             "doctor_id",
+            "doctor_name",
             "report_date",
         ]
+
+    def get_patient_name(self, obj):
+
+        if not obj.consultation:
+            return None
+
+        patient = Patient.objects.filter(
+            patient_id=obj.consultation.patient_id
+        ).first()
+
+        if patient:
+            return patient.full_name
+
+        return None
+
+    def get_doctor_name(self, obj):
+
+        if not obj.consultation:
+            return None
+
+        doctor = Doctor.objects.filter(
+            doctor_id=obj.consultation.doctor_id
+        ).first()
+
+        if doctor:
+            return doctor.name
+
+        return None
+        
 class ConsultationSerializer(serializers.ModelSerializer):
 
     prescribed_medicines = PrescribedMedicineSerializer(
@@ -317,13 +357,33 @@ class ConsultationSerializer(serializers.ModelSerializer):
         )
 
         # Save medicines
+        # for medicine_data in medicines_data:
+
+        #     PrescribedMedicine.objects.create(
+        #         consultation=consultation,
+        #         **medicine_data
+        #     )
+        # Save medicines
         for medicine_data in medicines_data:
+
+            medicine_id = medicine_data.get("medicine_id")
+
+            medicine = Medicine.objects.get(
+                medicine_id=medicine_id
+            )
 
             PrescribedMedicine.objects.create(
                 consultation=consultation,
-                **medicine_data
+                medicine_id=medicine.medicine_id,
+                medicine_name=medicine.medicine_name,
+                price=medicine.price_per_unit,
+                dosage=medicine_data.get("dosage"),
+                morning=medicine_data.get("morning", False),
+                afternoon=medicine_data.get("afternoon", False),
+                night=medicine_data.get("night", False),
+                food_timing=medicine_data.get("food_timing"),
+                duration=medicine_data.get("duration"),
             )
-
         # Save lab tests
         for test_data in tests_data:
 
@@ -441,5 +501,92 @@ class BillSerializer(serializers.ModelSerializer):
             "amount",
             "payment_status",
             "payment_method",
+            "bill_date",
+        ]
+
+class DepartmentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Department
+
+        fields = [
+            "department_id",
+            "name",
+            "description",
+            "is_active",
+        ]
+
+        read_only_fields = [
+            "department_id",
+        ]
+
+class LabBillSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = LabBill
+
+        fields = [
+            "lab_bill_id",
+            "lab_prescription_id",
+            "patient_id",
+            "patient_name",
+            "doctor_id",
+            "doctor_name",
+            "test_name",
+            "description",
+            "amount",
+            "payment_status",
+            "payment_method",
+            "bill_date",
+        ]
+
+        read_only_fields = [
+            "lab_bill_id",
+            "bill_date",
+        ]
+
+class AppointmentBillSerializer(serializers.ModelSerializer):
+
+    appointment_date = serializers.DateField(
+        source="appointment.date",
+        read_only=True
+    )
+
+    appointment_time = serializers.TimeField(
+        source="appointment.time",
+        read_only=True
+    )
+
+    appointment_number = serializers.CharField(
+        source="appointment.appointment_id",
+        read_only=True
+    )
+
+    class Meta:
+        model = AppointmentBill
+
+        fields = [
+            "id",
+            "appointment",
+            "appointment_number",
+            "appointment_date",
+            "appointment_time",
+            "patient_id",
+            "patient_name",
+            "doctor_id",
+            "doctor_name",
+            "department",
+            "appointment_type",
+            "amount",
+            "payment_status",
+            "payment_method",
+            "bill_date",
+        ]
+
+        read_only_fields = [
+            "id",
+            "appointment_number",
+            "appointment_date",
+            "appointment_time",
             "bill_date",
         ]

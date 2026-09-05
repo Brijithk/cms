@@ -1,58 +1,142 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./BillingRecords.css";
+import { getBills } from "../../services/billService";
 
 function BillingRecords() {
-    const [searchTerm, setSearchTerm] = useState("");
 
-    // Sample billing data
-    const [billingRecords] = useState([
-        {
-            bill_id: "BILL001",
-            patient_id: 1,
-            medicines: ["Paracetamol", "Amoxicillin"],
-            amount: 250,
-            payment: "Paid",
-            method: "UPI",
-        },
-        {
-            bill_id: "BILL002",
-            patient_id: 2,
-            medicines: ["Cetirizine"],
-            amount: 120,
-            payment: "Pending",
-            method: "-",
-        },
-        {
-            bill_id: "BILL003",
-            patient_id: 3,
-            medicines: ["Azithromycin", "Paracetamol"],
-            amount: 350,
-            payment: "Paid",
-            method: "Card",
-        },
-    ]);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [billingRecords, setBillingRecords] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+
+        const fetchBillingRecords = async () => {
+
+            try {
+
+                const data = await getBills();
+
+                console.log("BILLING RECORDS:", data);
+
+                setBillingRecords(
+                    Array.isArray(data)
+                        ? data
+                        : []
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Error fetching billing records:",
+                    error.response?.data || error
+                );
+
+            } finally {
+
+                setLoading(false);
+
+            }
+
+        };
+
+        fetchBillingRecords();
+
+    }, []);
+
 
     // Search
     const filteredRecords = billingRecords.filter((bill) => {
-        const search = searchTerm.toLowerCase();
+
+        const search =
+            searchTerm.toLowerCase();
+
+        const billId =
+            String(
+                bill.bill_id || ""
+            ).toLowerCase();
+
+        const patientId =
+            `P${String(
+                bill.patient_id || ""
+            ).padStart(3, "0")}`.toLowerCase();
+
+        const paymentStatus =
+            String(
+                bill.payment_status || ""
+            ).toLowerCase();
+
+        const paymentMethod =
+            String(
+                bill.payment_method || ""
+            ).toLowerCase();
 
         return (
-            bill.bill_id.toLowerCase().includes(search) ||
-            `P${String(bill.patient_id).padStart(3, "0")}`
-                .toLowerCase()
-                .includes(search) ||
-            bill.medicines.some((medicine) =>
-                medicine.toLowerCase().includes(search)
-            ) ||
-            bill.payment.toLowerCase().includes(search) ||
-            bill.method.toLowerCase().includes(search)
+            billId.includes(search) ||
+            patientId.includes(search) ||
+            paymentStatus.includes(search) ||
+            paymentMethod.includes(search)
         );
+
     });
 
+
+    const formatBillId = (id) => {
+
+        if (!id) {
+            return "-";
+        }
+
+        return `BILL${String(id).padStart(3, "0")}`;
+
+    };
+
+
+    const formatPatientId = (id) => {
+
+        if (!id) {
+            return "-";
+        }
+
+        return `P${String(id).padStart(3, "0")}`;
+
+    };
+
+
+    const formatAmount = (amount) => {
+
+        return Number(
+            amount || 0
+        ).toFixed(2);
+
+    };
+
+
+    const formatDate = (date) => {
+
+        if (!date) {
+            return "-";
+        }
+
+        return new Date(date).toLocaleString(
+            "en-IN",
+            {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+
+    };
+
+
     return (
+
         <div className="billing-section">
 
             {/* Search */}
+
             <div className="billing-controls">
 
                 <div className="billing-search-container">
@@ -66,7 +150,9 @@ function BillingRecords() {
                         placeholder="Search billing records..."
                         value={searchTerm}
                         onChange={(e) =>
-                            setSearchTerm(e.target.value)
+                            setSearchTerm(
+                                e.target.value
+                            )
                         }
                     />
 
@@ -75,116 +161,200 @@ function BillingRecords() {
             </div>
 
 
-            {/* Table */}
-            <div className="billing-table-container">
+            {/* Loading */}
 
-                <table>
+            {loading ? (
 
-                    <thead>
-                        <tr>
-                            <th>Bill ID</th>
-                            <th>Patient</th>
-                            <th>Medicines</th>
-                            <th>Amount</th>
-                            <th>Payment</th>
-                            <th>Method</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
+                <p>
+                    Loading billing records...
+                </p>
 
-                    <tbody>
+            ) : (
 
-                        {filteredRecords.length > 0 ? (
+                <div className="billing-table-container">
 
-                            filteredRecords.map((bill) => (
+                    <table>
 
-                                <tr key={bill.bill_id}>
+                        <thead>
 
-                                    {/* Bill ID */}
-                                    <td>
-                                        {bill.bill_id}
-                                    </td>
+                            <tr>
 
-                                    {/* Patient */}
-                                    <td>
-                                        P
-                                        {String(
-                                            bill.patient_id
-                                        ).padStart(3, "0")}
-                                    </td>
+                                <th>
+                                    Bill ID
+                                </th>
 
-                                    {/* Medicines */}
-                                    <td>
-                                        {bill.medicines.join(", ")}
-                                    </td>
+                                <th>
+                                    Patient
+                                </th>
 
-                                    {/* Amount */}
-                                    <td>
-                                        ₹{bill.amount}
-                                    </td>
+                                <th>
+                                    Amount
+                                </th>
 
-                                    {/* Payment */}
-                                    <td>
+                                <th>
+                                    Payment
+                                </th>
 
-                                        <span
-                                            className={`billing-status ${
-                                                bill.payment.toLowerCase()
-                                            }`}
-                                        >
-                                            {bill.payment}
-                                        </span>
+                                <th>
+                                    Method
+                                </th>
 
-                                    </td>
+                                <th>
+                                    Date
+                                </th>
 
-                                    {/* Method */}
-                                    <td>
-                                        {bill.method}
-                                    </td>
+                                <th>
+                                    Action
+                                </th>
 
-                                    {/* Action */}
-                                    <td>
+                            </tr>
 
-                                        <button
-                                            className="billing-action-button"
-                                            onClick={() =>
-                                                console.log(
-                                                    "View bill:",
-                                                    bill.bill_id
-                                                )
+                        </thead>
+
+
+                        <tbody>
+
+                            {filteredRecords.length > 0 ? (
+
+                                filteredRecords.map(
+                                    (bill) => (
+
+                                        <tr
+                                            key={
+                                                bill.bill_id
                                             }
                                         >
-                                            View
-                                        </button>
 
+                                            {/* Bill ID */}
+
+                                            <td>
+                                                {
+                                                    formatBillId(
+                                                        bill.bill_id
+                                                    )
+                                                }
+                                            </td>
+
+
+                                            {/* Patient */}
+
+                                            <td>
+                                                {
+                                                    formatPatientId(
+                                                        bill.patient_id
+                                                    )
+                                                }
+                                            </td>
+
+
+                                            {/* Amount */}
+
+                                            <td>
+                                                ₹
+                                                {
+                                                    formatAmount(
+                                                        bill.amount
+                                                    )
+                                                }
+                                            </td>
+
+
+                                            {/* Payment */}
+
+                                            <td>
+
+                                                <span
+                                                    className={`billing-status ${
+                                                        String(
+                                                            bill.payment_status ||
+                                                            ""
+                                                        ).toLowerCase()
+                                                    }`}
+                                                >
+
+                                                    {
+                                                        bill.payment_status ||
+                                                        "-"
+                                                    }
+
+                                                </span>
+
+                                            </td>
+
+
+                                            {/* Method */}
+
+                                            <td>
+                                                {
+                                                    bill.payment_method ||
+                                                    "-"
+                                                }
+                                            </td>
+
+
+                                            {/* Date */}
+
+                                            <td>
+                                                {
+                                                    formatDate(
+                                                        bill.created_at ||
+                                                        bill.bill_date
+                                                    )
+                                                }
+                                            </td>
+
+
+                                            {/* Action */}
+
+                                            <td>
+
+                                                <button
+                                                    className="billing-action-button"
+                                                    onClick={() =>
+                                                        console.log(
+                                                            "View bill:",
+                                                            bill
+                                                        )
+                                                    }
+                                                >
+                                                    View
+                                                </button>
+
+                                            </td>
+
+                                        </tr>
+
+                                    )
+
+                                )
+
+                            ) : (
+
+                                <tr>
+
+                                    <td
+                                        colSpan="7"
+                                        className="no-billing-records"
+                                    >
+                                        No billing records found
                                     </td>
 
                                 </tr>
 
-                            ))
+                            )}
 
-                        ) : (
+                        </tbody>
 
-                            <tr>
+                    </table>
 
-                                <td
-                                    colSpan="7"
-                                    className="no-billing-records"
-                                >
-                                    No billing records found
-                                </td>
+                </div>
 
-                            </tr>
-
-                        )}
-
-                    </tbody>
-
-                </table>
-
-            </div>
+            )}
 
         </div>
+
     );
+
 }
 
 export default BillingRecords;

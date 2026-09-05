@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import "./EditDoctor.css";
 import { updateDoctor } from "../../services/doctorService";
-
+import { getDepartments } from "../../services/departmentService";
 function EditDoctor({ doctor, onClose, onDoctorUpdated }) {
 
     const [formData, setFormData] = useState({
@@ -22,7 +22,7 @@ function EditDoctor({ doctor, onClose, onDoctorUpdated }) {
     });
 
     const [loading, setLoading] = useState(false);
-
+    const [departments, setDepartments] = useState([]);
     const handleChange = (e) => {
 
         const { name, value } = e.target;
@@ -32,7 +32,27 @@ function EditDoctor({ doctor, onClose, onDoctorUpdated }) {
             [name]: value
         });
     };
+                useEffect(() => {
+    const fetchDepartments = async () => {
+        try {
+            const data = await getDepartments();
 
+            const activeDepartments = data.filter(
+                (department) => department.is_active
+            );
+
+            setDepartments(activeDepartments);
+
+        } catch (error) {
+            console.error(
+                "Error fetching departments:",
+                error
+            );
+        }
+    };
+
+    fetchDepartments();
+}, []);
     const handleSubmit = async (e) => {
 
         e.preventDefault();
@@ -126,37 +146,25 @@ function EditDoctor({ doctor, onClose, onDoctorUpdated }) {
 
                             <label>Department</label>
 
-                            <select
-                                name="department"
-                                value={formData.department}
-                                onChange={handleChange}
-                                required
-                            >
+                           <select
+    name="department"
+    value={formData.department}
+    onChange={handleChange}
+    required
+>
+    <option value="">
+        Select Department
+    </option>
 
-                                <option value="">
-                                    Select department
-                                </option>
-
-                                <option value="Cardiology">Cardiology</option>
-                                <option value="Neurology">Neurology</option>
-                                <option value="Orthopedics">Orthopedics</option>
-                                <option value="Pediatrics">Pediatrics</option>
-                                <option value="Dermatology">Dermatology</option>
-                                <option value="General Medicine">
-                                    General Medicine
-                                </option>
-                                <option value="General Surgery">
-                                    General Surgery
-                                </option>
-                                <option value="Gynecology">Gynecology</option>
-                                <option value="ENT">ENT</option>
-                                <option value="Ophthalmology">
-                                    Ophthalmology
-                                </option>
-                                <option value="Dentistry">Dentistry</option>
-                                <option value="Other">Other</option>
-
-                            </select>
+    {departments.map((department) => (
+        <option
+            key={department.department_id}
+            value={department.name}
+        >
+            {department.name}
+        </option>
+    ))}
+</select>
 
                         </div>
 

@@ -11,3 +11,13 @@ export const addMedicine = async (medicineData) => {
     const response = await axios.post(API_URL, medicineData);
     return response.data;
 };
+
+export const updateMedicine = async (id, medicineData) => {
+
+    const response = await axios.put(
+        `${API_URL}${id}/`,
+        medicineData
+    );
+
+    return response.data;
+};

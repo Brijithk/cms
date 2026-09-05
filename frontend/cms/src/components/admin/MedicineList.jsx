@@ -3,6 +3,8 @@ import "./MedicineList.css";
 import { getMedicines } from "../../services/medicineService";
 import AddMedicine from "./addMedicine";
 import MedicineDetails from "./MedicineDetails";
+import EditMedicinePopup from "./EditMedicinePopup";
+
 function MedicineList() {
 
     const [medicines, setMedicines] = useState([]);
@@ -10,6 +12,7 @@ function MedicineList() {
     const [loading, setLoading] = useState(true);
     const [showAddMedicine, setShowAddMedicine] = useState(false);
     const [selectedMedicine, setSelectedMedicine] = useState(null);
+    const [editMedicine, setEditMedicine] = useState(null);
 
     useEffect(() => {
 
@@ -273,10 +276,12 @@ function MedicineList() {
 {selectedMedicine && (
     <MedicineDetails
         medicine={selectedMedicine}
+
         onClose={() => setSelectedMedicine(null)}
 
         onEdit={(medicine) => {
-            console.log("Edit:", medicine);
+            setSelectedMedicine(null);
+            setEditMedicine(medicine);
         }}
 
         onDelete={(medicine) => {
@@ -285,6 +290,29 @@ function MedicineList() {
 
         onRestock={(medicine) => {
             console.log("Restock:", medicine);
+        }}
+    />
+)}
+{editMedicine && (
+    <EditMedicinePopup
+        medicine={editMedicine}
+
+        onClose={() => {
+            setEditMedicine(null);
+        }}
+
+        onMedicineUpdated={(updatedMedicine) => {
+
+            setMedicines((prevMedicines) =>
+                prevMedicines.map((medicine) =>
+                    medicine.medicine_id ===
+                    updatedMedicine.medicine_id
+                        ? updatedMedicine
+                        : medicine
+                )
+            );
+
+            setEditMedicine(null);
         }}
     />
 )}

@@ -24,3 +24,12 @@ export const updatePrescribedTestStatus = async (
 
     return response.data;
 };
+
+export const createLabBill = async (labPrescriptionId, paymentMethod) => {
+    const response = await api.post("/lab-bills/", {
+        lab_prescription_id: labPrescriptionId,
+        payment_method: paymentMethod,
+    });
+
+    return response.data;
+};

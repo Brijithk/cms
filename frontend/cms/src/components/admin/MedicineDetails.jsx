@@ -1,3 +1,4 @@
+import { useState } from "react";
 import "./MedicineDetails.css";
 
 function MedicineDetails({
@@ -7,7 +8,9 @@ function MedicineDetails({
     onDelete,
     onRestock
 }) {
-
+                const [selectedMedicine, setSelectedMedicine] = useState(null);
+const [showDetails, setShowDetails] = useState(false);
+const [showEdit, setShowEdit] = useState(false);
     if (!medicine) return null;
 
     const getStockStatus = (stock) => {

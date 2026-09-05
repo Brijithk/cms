@@ -1,16 +1,16 @@
 # from django.shortcuts import render
 # from django.http import JsonResponse
 from doctor.models import Consultation,PrescribedLab,Doctor,PrescribedMedicine
-from receptionist.models import Patient ,Appointment
-from .serializers import BillSerializer,PrescribedMedicineSerializer,LabTestSerializer,MedicineSerializer,AppointmentSerializer,ConsultationSerializer,UserSerializer,PrescribedLabSerializer,PatientSerializer, StaffSerializer,DoctorSerializer
+from receptionist.models import Patient ,Appointment,AppointmentBill
+from .serializers import AppointmentBillSerializer,LabBillSerializer,DepartmentSerializer,BillSerializer,PrescribedMedicineSerializer,LabTestSerializer,MedicineSerializer,AppointmentSerializer,ConsultationSerializer,UserSerializer,PrescribedLabSerializer,PatientSerializer, StaffSerializer,DoctorSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
-from administrator.models import User,Staff,Medicine,LabTest
+from administrator.models import User,Staff,Medicine,LabTest,Department
 from django.http import Http404
 from rest_framework import mixins,generics
-from doctor.models import Consultation,Bill
+from doctor.models import Consultation,Bill,LabBill
 from rest_framework import viewsets
 # Create your views here.
 
@@ -175,6 +175,7 @@ class LoginView(APIView):
         # Check Staff
         try:
             staff = Staff.objects.get(username=username)
+            staff = Staff.objects.get(username=username,is_active=True)
 
             if staff.password == password:
 
@@ -359,3 +360,136 @@ class BillDetailView(generics.RetrieveAPIView):
 
     queryset = Bill.objects.all()
     serializer_class = BillSerializer
+
+class DepartmentListCreateView(generics.ListCreateAPIView):
+
+    queryset = Department.objects.all().order_by("department_id")
+    serializer_class = DepartmentSerializer
+
+class DepartmentDetailView(generics.RetrieveUpdateAPIView):
+
+    queryset = Department.objects.all()
+    serializer_class = DepartmentSerializer
+    lookup_field = "department_id"
+
+class LabBillViewSet(viewsets.ModelViewSet):
+
+    queryset = LabBill.objects.all().order_by("-bill_date")
+
+    serializer_class = LabBillSerializer
+
+    def create(self, request, *args, **kwargs):
+
+        lab_prescription_id = request.data.get(
+            "lab_prescription_id"
+        )
+
+        payment_method = request.data.get(
+            "payment_method"
+        )
+
+        if not lab_prescription_id:
+            return Response(
+                {
+                    "error": "lab_prescription_id is required."
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not payment_method:
+            return Response(
+                {
+                    "error": "payment_method is required."
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Get prescribed lab
+        prescribed_lab = PrescribedLab.objects.filter(
+            lab_prescription_id=lab_prescription_id
+        ).first()
+
+        if not prescribed_lab:
+            return Response(
+                {
+                    "error": "Lab prescription not found."
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Get consultation
+        consultation = prescribed_lab.consultation
+
+        if not consultation:
+            return Response(
+                {
+                    "error": "Consultation not found."
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Get patient
+        patient = Patient.objects.filter(
+            patient_id=consultation.patient_id
+        ).first()
+
+        if not patient:
+            return Response(
+                {
+                    "error": "Patient not found."
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Get doctor
+        doctor = Doctor.objects.filter(
+            doctor_id=consultation.doctor_id
+        ).first()
+
+        # Get laboratory test
+        lab_test = LabTest.objects.filter(
+            test_id=prescribed_lab.test_id
+        ).first()
+
+        if not lab_test:
+            return Response(
+                {
+                    "error": "Laboratory test not found."
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Create bill
+        bill = LabBill.objects.create(
+            lab_prescription_id=prescribed_lab.lab_prescription_id,
+
+            patient_id=patient.patient_id,
+
+            patient_name=patient.full_name,
+
+            doctor_id=doctor.doctor_id if doctor else None,
+
+            doctor_name=doctor.name if doctor else None,
+
+            test_name=lab_test.test_name,
+
+            description=lab_test.description,
+
+            amount=lab_test.price,
+
+            payment_status="paid",
+
+            payment_method=payment_method
+        )
+
+        serializer = self.get_serializer(bill)
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+class AppointmentBillViewSet(viewsets.ModelViewSet):
+
+    queryset = AppointmentBill.objects.all().order_by("-bill_date")
+
+    serializer_class = AppointmentBillSerializer
