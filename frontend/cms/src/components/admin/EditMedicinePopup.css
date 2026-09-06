@@ -234,21 +234,3 @@
 
 
 /* Responsive */
-
-@media (max-width: 700px) {
-
-    .edit-medicine-card {
-
-        width: 95%;
-
-        padding: 20px;
-    }
-
-    .edit-form-row {
-
-        grid-template-columns: 1fr;
-
-        gap: 0;
-    }
-
-}
