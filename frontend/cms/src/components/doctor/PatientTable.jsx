@@ -16,55 +16,148 @@ function PatientTable() {
     const [selectedConsultation, setSelectedConsultation] = useState(null);
 const [loadingConsultation, setLoadingConsultation] = useState(false);
 
+    // useEffect(() => {
+
+    //     const fetchAppointments = async () => {
+
+    //         try {
+
+    //             const doctorId = localStorage.getItem("doctorId");
+
+    //             console.log("Logged Doctor ID:", doctorId);
+
+    //             if (!doctorId) {
+    //                 console.error("Doctor ID not found in localStorage");
+    //                 return;
+    //             }
+
+    //             const data = await getAppointments();
+
+    //             console.log("ALL APPOINTMENTS:", data);
+
+    //             // Only appointments for logged-in doctor
+    //             const doctorAppointments = data.filter(
+    //                 (appointment) =>
+    //                     String(appointment.doctor_id) === String(doctorId)
+    //             );
+
+    //             console.log(
+    //                 "DOCTOR APPOINTMENTS:",
+    //                 doctorAppointments
+    //             );
+
+    //             setAppointments(doctorAppointments);
+
+    //         } catch (error) {
+
+    //             console.error(
+    //                 "Error fetching appointments:",
+    //                 error
+    //             );
+
+    //         } finally {
+
+    //             setLoading(false);
+
+    //         }
+    //     };
+
+    //     fetchAppointments();
+
+    // }, []);
+
     useEffect(() => {
 
-        const fetchAppointments = async () => {
+    const fetchAppointments = async () => {
 
-            try {
+        try {
 
-                const doctorId = localStorage.getItem("doctorId");
+            const doctorId =
+                localStorage.getItem("doctorId");
 
-                console.log("Logged Doctor ID:", doctorId);
+            console.log(
+                "Logged Doctor ID:",
+                doctorId
+            );
 
-                if (!doctorId) {
-                    console.error("Doctor ID not found in localStorage");
-                    return;
-                }
-
-                const data = await getAppointments();
-
-                console.log("ALL APPOINTMENTS:", data);
-
-                // Only appointments for logged-in doctor
-                const doctorAppointments = data.filter(
-                    (appointment) =>
-                        String(appointment.doctor_id) === String(doctorId)
-                );
-
-                console.log(
-                    "DOCTOR APPOINTMENTS:",
-                    doctorAppointments
-                );
-
-                setAppointments(doctorAppointments);
-
-            } catch (error) {
+            if (!doctorId) {
 
                 console.error(
-                    "Error fetching appointments:",
-                    error
+                    "Doctor ID not found in localStorage"
                 );
 
-            } finally {
-
-                setLoading(false);
-
+                return;
             }
-        };
 
-        fetchAppointments();
 
-    }, []);
+            const data = await getAppointments();
+
+            console.log(
+                "ALL APPOINTMENTS:",
+                data
+            );
+
+
+            // Get today's date: YYYY-MM-DD
+            const today = new Date();
+
+            const todayDate =
+                `${today.getFullYear()}-${String(
+                    today.getMonth() + 1
+                ).padStart(2, "0")}-${String(
+                    today.getDate()
+                ).padStart(2, "0")}`;
+
+
+            console.log(
+                "TODAY:",
+                todayDate
+            );
+
+
+            // Only today's appointments
+            // belonging to the logged-in doctor
+            const doctorAppointments =
+                data.filter(
+                    (appointment) =>
+                        String(
+                            appointment.doctor_id
+                        ) === String(doctorId) &&
+
+                        appointment.date === todayDate
+                );
+
+
+            console.log(
+                "TODAY'S DOCTOR APPOINTMENTS:",
+                doctorAppointments
+            );
+
+
+            setAppointments(
+                doctorAppointments
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Error fetching appointments:",
+                error
+            );
+
+        } finally {
+
+            setLoading(false);
+
+        }
+
+    };
+
+
+    fetchAppointments();
+
+}, []);
 
 
     const filteredAppointments = appointments.filter(
@@ -270,7 +363,7 @@ const [loadingConsultation, setLoadingConsultation] = useState(false);
                             {filteredAppointments.length > 0 ? (
 
                                 filteredAppointments.map(
-                                    (appointment) => (
+                                    (appointment, index) => (
 
                                         <tr
                                             key={
@@ -292,9 +385,9 @@ const [loadingConsultation, setLoadingConsultation] = useState(false);
                                             </td>
 
                                             <td>
-                                                {
-                                                    appointment.token_no
-                                                }
+                                                
+                                                    {index + 1}
+                                                
                                             </td>
 
                                             <td>

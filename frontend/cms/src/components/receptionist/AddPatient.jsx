@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./AddPatient.css";
 import { addPatient } from "../../services/patientService";
-
+import RegistrationPaymentPopup from "./RegistrationPaymentPopup";
 function AddPatient({ onClose, onPatientAdded }) {
 
     const [formData, setFormData] = useState({
@@ -16,63 +16,215 @@ function AddPatient({ onClose, onPatientAdded }) {
         allergies: ""
     });
 
+    const [showPaymentPopup, setShowPaymentPopup] = useState(false);
+const [createdPatient, setCreatedPatient] = useState(null);
+
+    const [errors, setErrors] = useState({});
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
+    const { name, value } = e.target;
 
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value
-        }));
-    };
+    setFormData((prev) => ({
+        ...prev,
+        [name]: value
+    }));
+
+    setErrors((prev) => ({
+        ...prev,
+        [name]: ""
+    }));
+};
+
+const validateForm = () => {
+
+    const newErrors = {};
+
+    // Full Name
+    if (!formData.fullName.trim()) {
+        newErrors.fullName = "Full name is required";
+    } else if (!/^[A-Za-z\s]+$/.test(formData.fullName.trim())) {
+        newErrors.fullName = "Name should contain only letters";
+    } else if (formData.fullName.trim().length < 3) {
+        newErrors.fullName = "Name must be at least 3 characters";
+    }
+
+    // Date of Birth
+    if (!formData.dateOfBirth) {
+        newErrors.dateOfBirth = "Date of birth is required";
+    } else {
+        const today = new Date();
+        const selectedDate = new Date(formData.dateOfBirth);
+
+        today.setHours(0, 0, 0, 0);
+
+        if (selectedDate > today) {
+            newErrors.dateOfBirth =
+                "Date of birth cannot be in the future";
+        }
+    }
+
+    // Gender
+    if (!formData.gender) {
+        newErrors.gender = "Please select gender";
+    }
+
+    // Phone
+    if (!formData.phone.trim()) {
+        newErrors.phone = "Phone number is required";
+    } else if (!/^\d{10}$/.test(formData.phone.trim())) {
+        newErrors.phone =
+            "Phone number must contain exactly 10 digits";
+    }
+
+    // Email - optional
+    if (formData.email.trim()) {
+        if (
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+                formData.email.trim()
+            )
+        ) {
+            newErrors.email = "Enter a valid email address";
+        }
+    }
+
+    // Blood Group
+    if (
+        formData.bloodGroup &&
+        ![
+            "A+",
+            "A-",
+            "B+",
+            "B-",
+            "AB+",
+            "AB-",
+            "O+",
+            "O-"
+        ].includes(formData.bloodGroup)
+    ) {
+        newErrors.bloodGroup = "Invalid blood group";
+    }
+
+    // Emergency Contact - optional
+    if (formData.emergencyContact.trim()) {
+
+        if (
+            !/^\d{10}$/.test(
+                formData.emergencyContact.trim()
+            )
+        ) {
+            newErrors.emergencyContact =
+                "Emergency contact must contain exactly 10 digits";
+        }
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+};
+
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+
+    //     setLoading(true);
+    //     setError("");
+
+    //     const patientData = {
+    //         full_name: formData.fullName,
+    //         date_of_birth: formData.dateOfBirth,
+    //         gender: formData.gender,
+    //         phone: formData.phone,
+    //         email: formData.email,
+    //         blood_group: formData.bloodGroup,
+    //         address: formData.address,
+    //         emergency_contact: formData.emergencyContact,
+    //         allergies: formData.allergies
+    //     };
+
+    //     try {
+
+    //         const newPatient = await addPatient(patientData);
+
+    //         console.log("Patient added:", newPatient);
+
+    //         // Tell PatientList that a new patient was added
+    //         if (onPatientAdded) {
+    //             onPatientAdded(newPatient);
+    //         }
+
+    //         onClose();
+
+    //     } catch (error) {
+
+    //         console.error("Error adding patient:", error);
+
+    //         setError(
+    //             error.response?.data
+    //                 ? JSON.stringify(error.response.data)
+    //                 : "Failed to add patient"
+    //         );
+
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
 
-        setLoading(true);
-        setError("");
+    e.preventDefault();
 
-        const patientData = {
-            full_name: formData.fullName,
-            date_of_birth: formData.dateOfBirth,
-            gender: formData.gender,
-            phone: formData.phone,
-            email: formData.email,
-            blood_group: formData.bloodGroup,
-            address: formData.address,
-            emergency_contact: formData.emergencyContact,
-            allergies: formData.allergies
-        };
+    const isValid = validateForm();
 
-        try {
+    if (!isValid) {
+        return;
+    }
 
-            const newPatient = await addPatient(patientData);
+    setLoading(true);
+    setError("");
 
-            console.log("Patient added:", newPatient);
-
-            // Tell PatientList that a new patient was added
-            if (onPatientAdded) {
-                onPatientAdded(newPatient);
-            }
-
-            onClose();
-
-        } catch (error) {
-
-            console.error("Error adding patient:", error);
-
-            setError(
-                error.response?.data
-                    ? JSON.stringify(error.response.data)
-                    : "Failed to add patient"
-            );
-
-        } finally {
-            setLoading(false);
-        }
+    const patientData = {
+        full_name: formData.fullName,
+        date_of_birth: formData.dateOfBirth,
+        gender: formData.gender,
+        phone: formData.phone,
+        email: formData.email,
+        blood_group: formData.bloodGroup,
+        address: formData.address,
+        emergency_contact: formData.emergencyContact,
+        allergies: formData.allergies
     };
+
+    try {
+
+        const newPatient = await addPatient(patientData);
+
+        console.log("Patient added:", newPatient);
+
+        // if (onPatientAdded) {
+        //     onPatientAdded(newPatient);
+        // }
+
+        setCreatedPatient(newPatient);
+setShowPaymentPopup(true);
+
+    } catch (error) {
+
+        console.error("Error adding patient:", error);
+
+        setError(
+            error.response?.data
+                ? JSON.stringify(error.response.data)
+                : "Failed to add patient"
+        );
+
+    } finally {
+
+        setLoading(false);
+
+    }
+};
 
     return (
         <div className="add-patient-overlay">
@@ -114,6 +266,12 @@ function AddPatient({ onClose, onPatientAdded }) {
                             required
                         />
 
+                          {errors.fullName && (
+        <span className="field-error">
+            {errors.fullName}
+        </span>
+    )}
+
                     </div>
 
 
@@ -131,6 +289,12 @@ function AddPatient({ onClose, onPatientAdded }) {
                                 onChange={handleChange}
                                 required
                             />
+
+                            {errors.dateOfBirth && (
+    <span className="field-error">
+        {errors.dateOfBirth}
+    </span>
+)}
 
                         </div>
 
@@ -186,6 +350,12 @@ function AddPatient({ onClose, onPatientAdded }) {
                                 required
                             />
 
+                            {errors.phone && (
+    <span className="field-error">
+        {errors.phone}
+    </span>
+)}
+
                         </div>
 
 
@@ -200,6 +370,7 @@ function AddPatient({ onClose, onPatientAdded }) {
                                 placeholder="Enter email"
                                 value={formData.email}
                                 onChange={handleChange}
+                                required
                             />
 
                         </div>
@@ -265,6 +436,12 @@ function AddPatient({ onClose, onPatientAdded }) {
                             onChange={handleChange}
                         />
 
+                        {errors.emergencyContact && (
+    <span className="field-error">
+        {errors.emergencyContact}
+    </span>
+)}
+
                     </div>
 
 
@@ -309,7 +486,26 @@ function AddPatient({ onClose, onPatientAdded }) {
                 </form>
 
             </div>
+          {showPaymentPopup && createdPatient && (
+    <RegistrationPaymentPopup
+        patient={createdPatient}
+        onClose={() => {
+            setShowPaymentPopup(false);
+            setCreatedPatient(null);
+        }}
+        onPaymentCompleted={() => {
 
+            if (onPatientAdded) {
+                onPatientAdded(createdPatient);
+            }
+
+            setShowPaymentPopup(false);
+            setCreatedPatient(null);
+            onClose();
+
+        }}
+    />
+)}
         </div>
     );
 }

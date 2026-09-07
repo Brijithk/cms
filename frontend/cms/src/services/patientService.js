@@ -11,3 +11,6 @@ export const addPatient = async (patientData) => {
     const response = await axios.post(API_URL, patientData);
     return response.data;
 };
+
+
+export const updatePatient = async (id, patientData) => { const response = await axios.put( `${API_URL}${id}/`, patientData ); return response.data; };

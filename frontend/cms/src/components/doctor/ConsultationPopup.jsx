@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import "./ConsultationPopup.css";
-
+import PatientHistory from "./PatientHistory";
 import { createConsultation } from "../../services/consultationService";
 import { getMedicines } from "../../services/medicineService";
 import { getTests } from "../../services/testService";
-
+import { getPatientHistory } from "../../services/consultationService";
 function ConsultationPopup({
       appointment,
     consultation,
@@ -15,7 +15,8 @@ function ConsultationPopup({
 
     const [medicines, setMedicines] = useState([]);
     const [tests, setTests] = useState([]);
-
+   const [showPatientHistory, setShowPatientHistory] =
+    useState(false);
     const [loadingData, setLoadingData] = useState(true);
     const [saving, setSaving] = useState(false);
 
@@ -503,14 +504,32 @@ const handleTestSelect = (index, testId) => {
                     </div>
 
 
-                    <button
+                    {/* <button
                         type="button"
                         className="close-button"
                         onClick={onClose}
                     >
                         ×
-                    </button>
+                    </button> */}
+                    <div className="header-actions">
 
+    <button
+        type="button"
+        className="patient-history-button"
+        onClick={() => setShowPatientHistory(true)}
+    >
+        📋 Patient History
+    </button>
+
+    <button
+        type="button"
+        className="close-button"
+        onClick={onClose}
+    >
+        ×
+    </button>
+
+</div>
                 </div>
 
 
@@ -636,7 +655,7 @@ const handleTestSelect = (index, testId) => {
 
                                     {/* Diagnosis */}
 
-                                    <div className="form-group full-width">
+                                    {/* <div className="form-group full-width">
 
                                         <label>
                                             Diagnosis
@@ -655,8 +674,31 @@ const handleTestSelect = (index, testId) => {
                                             required
                                         />
 
-                                    </div>
+                                    </div> */}
+{/* Diagnosis */}
 
+<div className="form-group full-width">
+
+    <label>
+        Diagnosis
+        {consultation && (
+            <span style={{ marginLeft: "8px", color: "#888", fontSize: "12px" }}>
+                (Read Only)
+            </span>
+        )}
+    </label>
+
+    <textarea
+        name="diagnosis"
+        value={formData.diagnosis}
+        onChange={handleChange}
+        placeholder="Enter diagnosis..."
+        rows="3"
+        required
+        readOnly={!!consultation}
+    />
+
+</div>
 
                                     {/* Doctor Notes */}
 
@@ -829,24 +871,23 @@ const handleTestSelect = (index, testId) => {
                                                 <div className="form-group">
 
                                                     <label>
-                                                        Dosage
+                                                        Dosage (per time)
                                                     </label>
 
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Example: 1 tablet"
-                                                        value={
-                                                            medicine.dosage
-                                                        }
-                                                        onChange={(e) =>
-                                                            handleMedicineChange(
-                                                                index,
-                                                                "dosage",
-                                                                e.target.value
-                                                            )
-                                                        }
-                                                        required
-                                                    />
+                                                 <input
+    type="number"
+    min="1"
+    placeholder="Example: 1"
+    value={medicine.dosage}
+    onChange={(e) =>
+        handleMedicineChange(
+            index,
+            "dosage",
+            e.target.value
+        )
+    }
+    required
+/>
 
                                                 </div>
 
@@ -856,24 +897,23 @@ const handleTestSelect = (index, testId) => {
                                                 <div className="form-group">
 
                                                     <label>
-                                                        Duration
+                                                        Dosage (per time)
                                                     </label>
 
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Example: 5 days"
-                                                        value={
-                                                            medicine.duration
-                                                        }
-                                                        onChange={(e) =>
-                                                            handleMedicineChange(
-                                                                index,
-                                                                "duration",
-                                                                e.target.value
-                                                            )
-                                                        }
-                                                        required
-                                                    />
+                                                   <input
+    type="number"
+    min="1"
+    placeholder="Example: 5"
+    value={medicine.duration}
+    onChange={(e) =>
+        handleMedicineChange(
+            index,
+            "duration",
+            e.target.value
+        )
+    }
+    required
+/>
 
                                                 </div>
 
@@ -1350,7 +1390,16 @@ const handleTestSelect = (index, testId) => {
                 )}
 
             </div>
+          {showPatientHistory && (
 
+    <PatientHistory
+        patientId={formData.patient_id}
+        onClose={() =>
+            setShowPatientHistory(false)
+        }
+    />
+
+)}
         </div>
 
     );

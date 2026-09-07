@@ -17,19 +17,7 @@
     margin-bottom: 15px;
 }
 
-.deactivate-button {
-    padding: 7px 14px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-}
 
-.activate-button {
-    padding: 7px 14px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-}
 /* =========================
    ADD STAFF BUTTON
    ========================= */
@@ -195,30 +183,49 @@
 
 .staff-action-buttons {
     display: flex;
-
     align-items: center;
-
     gap: 8px;
 }
 
 
-/* Edit */
+/* Common button styling */
 
-.edit-button {
-    padding: 7px 14px;
+.edit-button,
+.deactivate-button,
+.activate-button {
+    height: 32px;
+    min-width: 80px;
 
-    border: 1px solid #a00000;
+    padding: 0 14px;
+    margin: 0;
+
+    box-sizing: border-box;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
     border-radius: 4px;
+    border: 1px solid #a00000;
 
     background: white;
     color: #a00000;
 
-    cursor: pointer;
-
+    font-family: inherit;
     font-size: 13px;
+    font-weight: 400;
+
+    line-height: normal;
+
+    cursor: pointer;
 
     transition: 0.2s;
 }
+
+
+/* =========================
+   EDIT
+   ========================= */
 
 .edit-button:hover {
     background: #a00000;
@@ -226,10 +233,47 @@
 }
 
 
-/* Delete */
+/* =========================
+   DEACTIVATE
+   ========================= */
+
+.deactivate-button:hover {
+    background: #a00000;
+    color: white;
+}
+
+
+/* =========================
+   ACTIVATE
+   ========================= */
+
+.activate-button {
+    border-color: #198754;
+    color: #198754;
+}
+
+.activate-button:hover {
+    background: #198754;
+    color: white;
+}
+
+
+/* =========================
+   DELETE
+   ========================= */
 
 .delete-button {
-    padding: 7px 14px;
+    height: 32px;
+    min-width: 80px;
+
+    padding: 0 14px;
+    margin: 0;
+
+    box-sizing: border-box;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
     border: 1px solid #a00000;
     border-radius: 4px;
@@ -237,9 +281,10 @@
     background: white;
     color: #a00000;
 
-    cursor: pointer;
-
+    font-family: inherit;
     font-size: 13px;
+
+    cursor: pointer;
 
     transition: 0.2s;
 }
@@ -260,4 +305,9 @@
     padding: 25px !important;
 
     color: #777 !important;
+}
+
+.edit-button {
+    min-width: 104px;
+    padding: 0 14px;
 }

@@ -45,7 +45,7 @@
 
 
 /* =========================
-   SELECTED OPTION
+   SELECTED OPTION - FIXED
    ========================= */
 
 .pharmacist-menu-item.active {
@@ -54,10 +54,18 @@
     border-color: #8b0000;
 }
 
+/* Make selected icon white - FOR ALL ICONS */
+.pharmacist-menu-item.active img {
+    filter: brightness(0) invert(1) !important;
+    background: transparent !important;
+    mix-blend-mode: screen !important; /* removes white box around jpg */
+}
+
 /* Make selected icon white */
 
 .pharmacist-menu-item.active img {
-    filter: brightness(0) invert(1);
+    filter: none;
+    background: transparent;
 }
 
 
@@ -79,4 +87,10 @@
             saturate(4000%)
             hue-rotate(350deg)
             brightness(75%);
+}
+
+/* Sales Report - keep original, no white filter, no box */
+.pharmacist-menu-item.active img.sales-icon-no-filter {
+    filter: none !important;
+    background: transparent !important;
 }

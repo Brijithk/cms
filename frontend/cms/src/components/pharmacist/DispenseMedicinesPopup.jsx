@@ -256,24 +256,30 @@ const handlePayment = async () => {
 
         // console.log("BILL CREATED:", bill);
 
-   const bill = await createBill({
+//    const bill = await createBill({
+//     consultation_id: prescription.consultation_id,
+//     patient_id: prescription.patient_id,
+//     amount: totalAmount,
+//     payment_status: "paid",
+//     payment_method: paymentMethod
+// });
+
+const bill = await createBill({
     consultation_id: prescription.consultation_id,
     patient_id: prescription.patient_id,
-    amount: totalAmount,
-    payment_status: "paid",
     payment_method: paymentMethod
 });
 
 setCreatedBill(bill);
 
-        for (const medicine of medicines) {
+        // for (const medicine of medicines) {
 
-            await updatePrescribedMedicineStatus(
-                medicine.prescription_id,
-                "completed"
-            );
+        //     await updatePrescribedMedicineStatus(
+        //         medicine.prescription_id,
+        //         "completed"
+        //     );
 
-        }
+        // }
 
         setPaymentCompleted(true);
 
@@ -623,6 +629,8 @@ const generateBill = (paymentMethod,
 
                             <th>Duration</th>
 
+                            <th>Available Stock</th>
+
                             <th>Price</th>
 
                         </tr>
@@ -667,6 +675,10 @@ const generateBill = (paymentMethod,
                                             ${medicine.duration}
                                         </td>
 
+
+                                         <td>
+    ${medicine.stock_quantity ?? 0}
+</td>
                                         <td class="price">
                                             ₹${price.toFixed(2)}
                                         </td>
@@ -855,7 +867,7 @@ const generateBill = (paymentMethod,
                                         <th>
                                             Duration
                                         </th>
-
+                                         <th>Available Stock</th>
                                         <th>
                                             Price
                                         </th>
@@ -865,56 +877,53 @@ const generateBill = (paymentMethod,
                                 </thead>
 
 
-                                <tbody>
+                             <tbody>
 
-                                    {medicines.map(
-                                        (medicine) => (
+    {medicines.map((medicine) => (
 
-                                            <tr
-                                                key={
-                                                    medicine.prescription_id
-                                                }
-                                            >
+        <tr
+            key={medicine.prescription_id}
+        >
 
-                                                <td>
-                                                    {
-                                                        medicine.medicine_name ||
-                                                        "-"
-                                                    }
-                                                </td>
+            <td>
+                {medicine.medicine_name || "-"}
+            </td>
 
-                                                <td>
-                                                    {
-                                                        medicine.dosage ||
-                                                        "-"
-                                                    }
-                                                </td>
+            <td>
+                {medicine.dosage || "-"}
+            </td>
 
-                                                <td>
-                                                    {
-                                                        getTiming(
-                                                            medicine
-                                                        )
-                                                    }
-                                                </td>
+            <td>
+                {getTiming(medicine)}
+            </td>
 
-                                                <td>
-                                                    {
-                                                        medicine.duration ||
-                                                        "-"
-                                                    }
-                                                </td>
+            <td>
+                {medicine.duration || "-"}
+            </td>
 
-                                                <td>
-                                                     ₹{Number(medicine.price || 0).toFixed(2)}
-                                                </td>
+            <td>
+                <span
+                    className={
+                        Number(medicine.stock_quantity || 0) === 0
+                            ? "stock-out"
+                            : Number(medicine.stock_quantity || 0) <= 10
+                                ? "stock-low"
+                                : "stock-available"
+                    }
+                >
+                    {medicine.stock_quantity ?? 0}
+                </span>
+            </td>
 
-                                            </tr>
+            <td>
+                ₹{Number(medicine.price || 0).toFixed(2)}
+            </td>
 
-                                        )
-                                    )}
+        </tr>
 
-                                </tbody>
+    ))}
+
+</tbody>
 
                             </table>
 

@@ -16,17 +16,46 @@ function AddMedicine({ onClose, onMedicineAdded }) {
 
     const [loading, setLoading] = useState(false);
 
-    const handleChange = (e) => {
+   const handleChange = (e) => {
+    const { name, value } = e.target;
 
-        const { name, value } = e.target;
+    if (name === "expiry_date") {
+        const selectedDate = new Date(value);
+        const minimumDate = new Date();
 
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value
-        }));
+        minimumDate.setFullYear(
+            minimumDate.getFullYear() + 1
+        );
 
-    };
+        // Remove time for accurate date comparison
+        selectedDate.setHours(0, 0, 0, 0);
+        minimumDate.setHours(0, 0, 0, 0);
 
+        if (selectedDate < minimumDate) {
+            alert("Expiry date must be at least 1 year from today.");
+
+            // Don't store the invalid date
+            setFormData((prev) => ({
+                ...prev,
+                expiry_date: ""
+            }));
+
+            return;
+        }
+    }
+
+    setFormData((prev) => ({
+        ...prev,
+        [name]: value
+    }));
+};
+    const getMinimumExpiryDate = () => {
+    const today = new Date();
+
+    today.setFullYear(today.getFullYear() + 1);
+
+    return today.toISOString().split("T")[0];
+};
 
    const handleSubmit = async (e) => {
 
@@ -126,7 +155,7 @@ function AddMedicine({ onClose, onMedicineAdded }) {
 
 
                         {/* Type */}
-                        <div className="form-group">
+                        {/* <div className="form-group">
 
                             <label>
                                 Category / Type
@@ -141,8 +170,59 @@ value={formData.medicine_type}
                                 required
                             />
 
-                        </div>
+                        </div> */}
 
+{/* Type */}
+<div className="form-group">
+
+    <label>
+        Category / Type
+    </label>
+
+    <select
+        name="medicine_type"
+        value={formData.medicine_type}
+        onChange={handleChange}
+        required
+    >
+        <option value="">
+            Select medicine type
+        </option>
+
+        <option value="Tablet">
+            Tablet
+        </option>
+
+        <option value="Capsule">
+            Capsule
+        </option>
+
+        <option value="Syrup">
+            Syrup
+        </option>
+
+        <option value="Injection">
+            Injection
+        </option>
+
+        <option value="Cream">
+            Cream
+        </option>
+
+        <option value="Ointment">
+            Ointment
+        </option>
+
+        <option value="Drops">
+            Drops
+        </option>
+
+        <option value="Other">
+            Other
+        </option>
+    </select>
+
+</div>
 
                         {/* Manufacturer */}
                         <div className="form-group full-width">
@@ -186,7 +266,7 @@ value={formData.medicine_type}
 
 
                         {/* Expiry Date */}
-                        <div className="form-group">
+                        {/* <div className="form-group">
 
                             <label>
                                 Expiry Date
@@ -202,9 +282,24 @@ value={formData.medicine_type}
                                 required
                             />
 
-                        </div>
+                        </div> */}
+                                {/* Expiry Date */}
+<div className="form-group">
 
+    <label>
+        Expiry Date
+    </label>
 
+    <input
+        type="date"
+        name="expiry_date"
+        value={formData.expiry_date}
+        onChange={handleChange}
+        required
+    />
+
+</div>
+                          
                         {/* Price */}
                         <div className="form-group">
 

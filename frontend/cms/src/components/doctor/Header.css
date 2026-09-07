@@ -26,7 +26,7 @@
 .hospital-logo {
     width: 42px;
     height: 42px;
-    object-fit: contain;
+    object-fit: cover;
 }
 
 .header-left h2 {

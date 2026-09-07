@@ -315,3 +315,56 @@
     }
 
 }
+
+
+
+.medicine-restock {
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.medicine-restock label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.medicine-restock-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.medicine-restock-controls input {
+    width: 180px;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.medicine-restock-controls input:focus {
+    outline: none;
+    border-color: #2563eb;
+}
+
+.medicine-restock-controls button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    background: #2563eb;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.medicine-restock-controls button:hover {
+    background: #1d4ed8;
+}
+
+.medicine-restock-controls button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

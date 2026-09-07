@@ -11,7 +11,8 @@ from .views import (
     DepartmentListCreateView,
     DepartmentDetailView,
     LabBillViewSet,
-    AppointmentBillViewSet
+    AppointmentBillViewSet,
+    PatientHistoryView
 )
 
 
@@ -111,5 +112,11 @@ path(
     DepartmentDetailView.as_view(),
     name="department-detail"
 ),
+
+path(
+        "patient-history/<int:patient_id>/",
+        PatientHistoryView.as_view(),
+        name="patient-history"
+    ),
 
 ]

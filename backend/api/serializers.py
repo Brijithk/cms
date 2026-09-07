@@ -122,14 +122,27 @@ class PrescribedMedicineSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
+    stock_quantity = serializers.SerializerMethodField()
+
+    def get_stock_quantity(self, obj):
+        try:
+            medicine = Medicine.objects.get(
+                medicine_id=obj.medicine_id
+            )
+            return medicine.stock_quantity
+        except Medicine.DoesNotExist:
+            return 0
+
     class Meta:
         model = PrescribedMedicine
+
         fields = [
             "prescription_id",
             "consultation_id",
             "medicine_id",
             "medicine_name",
             "price",
+            "stock_quantity",
             "dosage",
             "morning",
             "afternoon",
@@ -140,7 +153,6 @@ class PrescribedMedicineSerializer(serializers.ModelSerializer):
             "doctor_id",
             "status",
         ]
-
 # class PrescribedMedicineSerializer(serializers.ModelSerializer):
 
 #     patient_id = serializers.IntegerField(
@@ -305,6 +317,180 @@ class PrescribedLabSerializer(serializers.ModelSerializer):
 
         return None
         
+# class ConsultationSerializer(serializers.ModelSerializer):
+
+#     prescribed_medicines = PrescribedMedicineSerializer(
+#         many=True,
+#         required=False
+#     )
+
+#     prescribed_tests = PrescribedLabSerializer(
+#         many=True,
+#         required=False
+#     )
+
+#     class Meta:
+#         model = Consultation
+
+#         fields = [
+#             "consultation_id",
+#             "appointment",
+#             "patient_id",
+#             "doctor_id",
+#             "symptoms",
+#             "diagnosis",
+#             "doctor_notes",
+#             "medical_advice",
+#             "consultation_date",
+#             "follow_up_date",
+#             "notes",
+#             "prescribed_medicines",
+#             "prescribed_tests",
+#         ]
+
+#         read_only_fields = [
+#             "consultation_id"
+#         ]
+
+#     def create(self, validated_data):
+
+#         medicines_data = validated_data.pop(
+#             "prescribed_medicines",
+#             []
+#         )
+
+#         tests_data = validated_data.pop(
+#             "prescribed_tests",
+#             []
+#         )
+
+#         consultation = Consultation.objects.create(
+#             **validated_data
+#         )
+
+#         # Save medicines
+#         # for medicine_data in medicines_data:
+
+#         #     PrescribedMedicine.objects.create(
+#         #         consultation=consultation,
+#         #         **medicine_data
+#         #     )
+#         # Save medicines
+#         for medicine_data in medicines_data:
+
+#             medicine_id = medicine_data.get("medicine_id")
+
+#             medicine = Medicine.objects.get(
+#                 medicine_id=medicine_id
+#             )
+
+#             # PrescribedMedicine.objects.create(
+#             #     consultation=consultation,
+#             #     medicine_id=medicine.medicine_id,
+#             #     medicine_name=medicine.medicine_name,
+#             #     price=medicine.price_per_unit,
+#             #     dosage=medicine_data.get("dosage"),
+#             #     morning=medicine_data.get("morning", False),
+#             #     afternoon=medicine_data.get("afternoon", False),
+#             #     night=medicine_data.get("night", False),
+#             #     food_timing=medicine_data.get("food_timing"),
+#             #     duration=medicine_data.get("duration"),
+#             # )
+#             PrescribedMedicine.objects.create(
+#                 consultation=consultation,
+#                 medicine_id=medicine.medicine_id,
+#                 medicine_name=medicine.medicine_name,
+#                 price=medicine.price_per_unit,
+#                 quantity=medicine_data.get("quantity", 1),
+#                 dosage=medicine_data.get("dosage"),
+#                 morning=medicine_data.get("morning", False),
+#                 afternoon=medicine_data.get("afternoon", False),
+#                 night=medicine_data.get("night", False),
+#                 food_timing=medicine_data.get("food_timing"),
+#                 duration=medicine_data.get("duration"),
+#             )
+#         # Save lab tests
+#         for test_data in tests_data:
+
+#             test = LabTest.objects.get(
+#                 test_id=test_data["test_id"]
+#             )
+
+#             PrescribedLab.objects.create(
+#                 consultation=consultation,
+#                 test_id=test.test_id,
+#                 test_name=test.test_name
+#             )
+
+#         return consultation
+#     # class ConsultationSerializer(serializers.ModelSerializer):
+
+#     #     prescribed_medicines = PrescribedMedicineSerializer(
+#     #         many=True,
+#     #         required=False
+#     #     )
+
+#     #     prescribed_tests = PrescribedLabSerializer(
+#     #         many=True,
+#     #         required=False
+#     #     )
+
+#     #     class Meta:
+#     #         model = Consultation
+#     #         fields = [
+#     #             "consultation_id",
+#     #             "appointment",
+#     #             "patient_id",
+#     #             "doctor_id",
+#     #             "symptoms",
+#     #             "diagnosis",
+#     #             "doctor_notes",
+#     #             "medical_advice",
+#     #             "consultation_date",
+#     #             "follow_up_date",
+#     #             "notes",
+#     #             "prescribed_medicines",
+#     #             "prescribed_tests",
+#     #         ]
+
+#     #         read_only_fields = [
+#     #             "consultation_id"
+#     #         ]
+
+#     #     def create(self, validated_data):
+
+#     #         medicines_data = validated_data.pop(
+#     #             "prescribed_medicines",
+#     #             []
+#     #         )
+
+#     #         tests_data = validated_data.pop(
+#     #             "prescribed_tests",
+#     #             []
+#     #         )
+
+#     #         consultation = Consultation.objects.create(
+#     #             **validated_data
+#     #         )
+
+#     #         # Create medicines
+#     #         for medicine_data in medicines_data:
+
+#     #             PrescribedMedicine.objects.create(
+#     #                 consultation_id=consultation.consultation_id,
+#     #                 **medicine_data
+#     #             )
+
+#     #         # Create tests
+#     #         for test_data in tests_data:
+
+#     #             PrescribedLab.objects.create(
+#     #                 consultation_id=consultation.consultation_id,
+#     #                 **test_data
+#     #             )
+
+#     #         return consultation
+
 class ConsultationSerializer(serializers.ModelSerializer):
 
     prescribed_medicines = PrescribedMedicineSerializer(
@@ -352,119 +538,219 @@ class ConsultationSerializer(serializers.ModelSerializer):
             []
         )
 
+        # =========================================
+        # CREATE CONSULTATION
+        # =========================================
+
         consultation = Consultation.objects.create(
             **validated_data
         )
 
-        # Save medicines
-        # for medicine_data in medicines_data:
+        # =========================================
+        # SAVE PRESCRIBED MEDICINES
+        # =========================================
 
-        #     PrescribedMedicine.objects.create(
-        #         consultation=consultation,
-        #         **medicine_data
-        #     )
-        # Save medicines
         for medicine_data in medicines_data:
 
             medicine_id = medicine_data.get("medicine_id")
 
-            medicine = Medicine.objects.get(
-                medicine_id=medicine_id
+            # Get actual medicine from Medicine table
+            try:
+                medicine = Medicine.objects.get(
+                    medicine_id=medicine_id
+                )
+            except Medicine.DoesNotExist:
+                raise serializers.ValidationError({
+                    "medicine_id":
+                        f"Medicine {medicine_id} does not exist."
+                })
+
+            # -----------------------------------------
+            # DOSAGE
+            # -----------------------------------------
+
+            try:
+                dosage = int(
+                    medicine_data.get("dosage", 1)
+                )
+            except (TypeError, ValueError):
+                raise serializers.ValidationError({
+                    "dosage":
+                        "Dosage must be a valid number."
+                })
+
+            if dosage <= 0:
+                raise serializers.ValidationError({
+                    "dosage":
+                        "Dosage must be greater than 0."
+                })
+
+            # -----------------------------------------
+            # NUMBER OF TIMES PER DAY
+            # -----------------------------------------
+
+            morning = medicine_data.get(
+                "morning",
+                False
             )
+
+            afternoon = medicine_data.get(
+                "afternoon",
+                False
+            )
+
+            night = medicine_data.get(
+                "night",
+                False
+            )
+
+            times_per_day = sum([
+                bool(morning),
+                bool(afternoon),
+                bool(night)
+            ])
+
+            if times_per_day == 0:
+                raise serializers.ValidationError({
+                    "medicine":
+                        f"Select at least one medication time "
+                        f"for {medicine.medicine_name}."
+                })
+
+            # -----------------------------------------
+            # DURATION
+            # -----------------------------------------
+
+            try:
+                duration = int(
+                    medicine_data.get("duration", 1)
+                )
+            except (TypeError, ValueError):
+                raise serializers.ValidationError({
+                    "duration":
+                        "Duration must be a valid number of days."
+                })
+
+            if duration <= 0:
+                raise serializers.ValidationError({
+                    "duration":
+                        "Duration must be greater than 0."
+                })
+
+            # -----------------------------------------
+            # CALCULATE TOTAL QUANTITY
+            # -----------------------------------------
+
+            quantity = (
+                dosage *
+                times_per_day *
+                duration
+            )
+
+            # -----------------------------------------
+            # CHECK STOCK
+            # -----------------------------------------
+
+            if medicine.stock_quantity < quantity:
+                raise serializers.ValidationError({
+                    "stock":
+                        f"Insufficient stock for "
+                        f"{medicine.medicine_name}. "
+                        f"Available: {medicine.stock_quantity}, "
+                        f"Required: {quantity}"
+                })
+
+            # -----------------------------------------
+            # CREATE PRESCRIPTION
+            # -----------------------------------------
 
             PrescribedMedicine.objects.create(
+
                 consultation=consultation,
+
                 medicine_id=medicine.medicine_id,
+
                 medicine_name=medicine.medicine_name,
+
                 price=medicine.price_per_unit,
-                dosage=medicine_data.get("dosage"),
-                morning=medicine_data.get("morning", False),
-                afternoon=medicine_data.get("afternoon", False),
-                night=medicine_data.get("night", False),
-                food_timing=medicine_data.get("food_timing"),
-                duration=medicine_data.get("duration"),
+
+                quantity=quantity,
+
+                dosage=str(dosage),
+
+                morning=morning,
+
+                afternoon=afternoon,
+
+                night=night,
+
+                food_timing=medicine_data.get(
+                    "food_timing"
+                ),
+
+                duration=str(duration),
+
             )
-        # Save lab tests
+
+        # =========================================
+        # SAVE PRESCRIBED LAB TESTS
+        # =========================================
+
         for test_data in tests_data:
 
-            test = LabTest.objects.get(
-                test_id=test_data["test_id"]
-            )
+            try:
+                test = LabTest.objects.get(
+                    test_id=test_data["test_id"]
+                )
+            except LabTest.DoesNotExist:
+                raise serializers.ValidationError({
+                    "test_id":
+                        f"Test {test_data['test_id']} does not exist."
+                })
 
             PrescribedLab.objects.create(
                 consultation=consultation,
+
                 test_id=test.test_id,
+
                 test_name=test.test_name
             )
 
         return consultation
-    # class ConsultationSerializer(serializers.ModelSerializer):
 
-    #     prescribed_medicines = PrescribedMedicineSerializer(
-    #         many=True,
-    #         required=False
-    #     )
+class PatientHistorySerializer(serializers.Serializer):
 
-    #     prescribed_tests = PrescribedLabSerializer(
-    #         many=True,
-    #         required=False
-    #     )
+    consultations = serializers.SerializerMethodField()
 
-    #     class Meta:
-    #         model = Consultation
-    #         fields = [
-    #             "consultation_id",
-    #             "appointment",
-    #             "patient_id",
-    #             "doctor_id",
-    #             "symptoms",
-    #             "diagnosis",
-    #             "doctor_notes",
-    #             "medical_advice",
-    #             "consultation_date",
-    #             "follow_up_date",
-    #             "notes",
-    #             "prescribed_medicines",
-    #             "prescribed_tests",
-    #         ]
+    lab_reports = serializers.SerializerMethodField()
 
-    #         read_only_fields = [
-    #             "consultation_id"
-    #         ]
+    def get_consultations(self, obj):
 
-    #     def create(self, validated_data):
+        consultations = Consultation.objects.filter(
+            patient_id=obj
+        ).order_by("-consultation_date", "-consultation_id")
 
-    #         medicines_data = validated_data.pop(
-    #             "prescribed_medicines",
-    #             []
-    #         )
+        return ConsultationSerializer(
+            consultations,
+            many=True,
+            context=self.context
+        ).data
 
-    #         tests_data = validated_data.pop(
-    #             "prescribed_tests",
-    #             []
-    #         )
+    def get_lab_reports(self, obj):
 
-    #         consultation = Consultation.objects.create(
-    #             **validated_data
-    #         )
+        reports = PrescribedLab.objects.filter(
+            consultation__patient_id=obj
+        ).order_by(
+            "-consultation__consultation_date",
+            "-lab_prescription_id"
+        )
 
-    #         # Create medicines
-    #         for medicine_data in medicines_data:
+        return PrescribedLabSerializer(
+            reports,
+            many=True,
+            context=self.context
+        ).data
 
-    #             PrescribedMedicine.objects.create(
-    #                 consultation_id=consultation.consultation_id,
-    #                 **medicine_data
-    #             )
-
-    #         # Create tests
-    #         for test_data in tests_data:
-
-    #             PrescribedLab.objects.create(
-    #                 consultation_id=consultation.consultation_id,
-    #                 **test_data
-    #             )
-
-    #         return consultation
 # class BillSerializer(serializers.ModelSerializer):
 
 #     consultation_id = serializers.PrimaryKeyRelatedField(

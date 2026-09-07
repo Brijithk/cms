@@ -94,3 +94,62 @@
 .form-group textarea:focus {
     border-color: #a00000;
 }
+
+.form-group input:disabled {
+    background: #f5f5f5;
+    color: #777;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.form-actions {
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 20px;
+}
+
+.cancel-button,
+.save-button {
+    padding: 10px 20px;
+
+    border-radius: 5px;
+
+    font-size: 14px;
+
+    cursor: pointer;
+}
+
+.cancel-button {
+    background: white;
+
+    border: 1px solid #a00000;
+
+    color: #a00000;
+}
+
+.save-button {
+    background: #a00000;
+
+    border: 1px solid #a00000;
+
+    color: white;
+}
+
+.save-button:hover {
+    background: #7d0000;
+}

@@ -72,3 +72,13 @@
     border-color: #8b0000;
 }
 
+/* Make hovered icon red */
+
+.admin-menu-item:not(.active):hover img {
+    filter: brightness(0) saturate(100%)
+            invert(13%) sepia(90%)
+            saturate(4000%)
+            hue-rotate(350deg)
+            brightness(75%);
+}
+

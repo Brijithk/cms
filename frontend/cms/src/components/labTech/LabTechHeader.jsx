@@ -24,7 +24,7 @@ function LabTechHeader() {
                     className="lab-tech-hospital-logo"
                 />
 
-                <h2>City Care Hospital</h2>
+                <h2>Kims</h2>
 
             </div>
 

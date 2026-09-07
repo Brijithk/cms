@@ -281,3 +281,34 @@
 .generate-bill-btn:hover {
     background: #800000;
 }
+
+
+.stock-available {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 15px;
+    background: #d1e7dd;
+    color: #0f5132;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.stock-low {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 15px;
+    background: #fff3cd;
+    color: #856404;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.stock-out {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 15px;
+    background: #f8d7da;
+    color: #842029;
+    font-size: 12px;
+    font-weight: 600;
+}

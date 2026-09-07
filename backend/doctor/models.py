@@ -152,6 +152,8 @@ class PrescribedMedicine(models.Model):
         default=0
     )
 
+    quantity = models.PositiveIntegerField(default=1)
+
     dosage = models.CharField(max_length=100)
 
     morning = models.BooleanField(default=False)

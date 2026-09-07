@@ -36,3 +36,12 @@
     color: #666;
 }
 
+
+/* Image */
+
+.receptionist-welcome-image img {
+    width: 180px;
+    height: 140px;
+
+    object-fit: contain;
+}

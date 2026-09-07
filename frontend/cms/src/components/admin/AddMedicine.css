@@ -66,3 +66,136 @@
     color: #777;
 }
 
+
+.close-button {
+    border: none;
+
+    background: none;
+
+    font-size: 28px;
+
+    color: #777;
+
+    cursor: pointer;
+}
+
+.close-button:hover {
+    color: #a00000;
+}
+
+
+/* Form */
+
+.medicine-form {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 18px 25px;
+}
+
+
+.form-group {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 13px;
+
+    font-weight: 500;
+
+    color: #555;
+}
+
+.form-group input,
+.form-group select {
+    padding: 10px 12px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 5px;
+
+    outline: none;
+
+    font-size: 14px;
+
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #a00000;
+}
+
+.full-width {
+    grid-column: span 2;
+}
+
+
+/* Actions */
+
+.medicine-actions {
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    border-top: 1px solid #eee;
+
+    padding-top: 20px;
+
+    margin-top: 25px;
+}
+
+.medicine-actions button {
+    padding: 9px 18px;
+
+    border-radius: 5px;
+
+    font-size: 13px;
+
+    cursor: pointer;
+}
+
+
+/* Cancel */
+
+.cancel-button {
+    background: white;
+
+    border: 1px solid #777;
+
+    color: #555;
+}
+
+.cancel-button:hover {
+    background: #777;
+
+    color: white;
+}
+
+
+/* Add */
+
+.add-button {
+    background: #a00000;
+
+    border: 1px solid #a00000;
+
+    color: white;
+}
+
+.add-button:hover {
+    background: #7d0000;
+}
+
+.add-button:disabled {
+    opacity: 0.6;
+
+    cursor: not-allowed;
+}

@@ -234,3 +234,11 @@
 .test-payment-section select:focus {
     border-color: #a00000;
 }
+
+
+.field-error {
+    display: block;
+    color: red;
+    font-size: 13px;
+    margin-top: 5px;
+}

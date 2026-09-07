@@ -22,16 +22,24 @@ function AddStaff({ onClose, onStaffAdded }) {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [errors, setErrors] = useState({});
     const [departments, setDepartments] = useState([]);
-    const handleChange = (e) => {
+   const handleChange = (e) => {
+    const { name, value } = e.target;
 
-        const { name, value } = e.target;
+    setFormData((prev) => ({
+        ...prev,
+        [name]: value
+    }));
 
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value
-        }));
-    };
+    // Clear validation error when user starts correcting the field
+    setErrors((prev) => ({
+        ...prev,
+        [name]: ""
+    }));
+
+    setError("");
+};
         useEffect(() => {
     const fetchDepartments = async () => {
         try {
@@ -54,44 +62,144 @@ function AddStaff({ onClose, onStaffAdded }) {
 
     fetchDepartments();
 }, []);
-    const handleSubmit = async (e) => {
 
-        e.preventDefault();
+   const validateForm = () => {
+    const newErrors = {};
 
-        setError("");
-        setLoading(true);
+    // Name
+    if (!formData.name.trim()) {
+        newErrors.name = "Name is required.";
+    } else if (!/^[A-Za-z\s]+$/.test(formData.name.trim())) {
+        newErrors.name = "Name should contain only letters.";
+    } else if (formData.name.trim().length < 2) {
+        newErrors.name = "Name must be at least 2 characters.";
+    }
 
-        try {
+    // Date of Birth
+    if (!formData.date_of_birth) {
+        newErrors.date_of_birth = "Date of birth is required.";
+    } else {
+        const dob = new Date(formData.date_of_birth);
+        const today = new Date();
 
-            const newStaff = await addStaff(formData);
-
-            console.log("STAFF CREATED:", newStaff);
-
-            // Send newly created staff back to StaffList
-            if (onStaffAdded) {
-                onStaffAdded(newStaff);
-            }
-
-            onClose();
-
-        } catch (error) {
-
-            console.error("Error adding staff:", error);
-
-            if (error.response?.data) {
-                setError(
-                    JSON.stringify(error.response.data)
-                );
-            } else {
-                setError("Failed to add staff. Please try again.");
-            }
-
-        } finally {
-
-            setLoading(false);
-
+        if (dob > today) {
+            newErrors.date_of_birth = "Date of birth cannot be in the future.";
         }
-    };
+    }
+
+    // Gender
+    if (!formData.gender) {
+        newErrors.gender = "Please select a gender.";
+    }
+
+    // Phone
+    if (!formData.phone.trim()) {
+        newErrors.phone = "Phone number is required.";
+    } else if (!/^\d{10}$/.test(formData.phone.trim())) {
+        newErrors.phone = "Phone number must contain exactly 10 digits.";
+    }
+
+    // Email
+    if (!formData.email.trim()) {
+        newErrors.email = "Email is required.";
+    } else if (
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())
+    ) {
+        newErrors.email = "Enter a valid email address.";
+    }
+
+    // Department
+    if (!formData.department) {
+        newErrors.department = "Please select a department.";
+    }
+
+    // Qualification
+    if (
+        formData.qualification.trim() &&
+        !/^[A-Za-z0-9\s.,&()+/-]+$/.test(
+            formData.qualification.trim()
+        )
+    ) {
+        newErrors.qualification = "Enter a valid qualification.";
+    }
+
+    // Emergency Contact
+    if (
+        formData.emergency_contact.trim() &&
+        !/^\d{10}$/.test(formData.emergency_contact.trim())
+    ) {
+        newErrors.emergency_contact =
+            "Emergency contact must contain exactly 10 digits.";
+    }
+
+    // Username
+    if (!formData.username.trim()) {
+        newErrors.username = "Username is required.";
+    } else if (
+        !/^[A-Za-z0-9_]{4,30}$/.test(formData.username.trim())
+    ) {
+        newErrors.username =
+            "Username must be 4-30 characters and contain only letters, numbers, or underscore.";
+    }
+
+    // Password
+    if (!formData.password) {
+        newErrors.password = "Password is required.";
+    } else if (formData.password.length < 8) {
+        newErrors.password =
+            "Password must be at least 8 characters.";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+};
+
+   const handleSubmit = async (e) => {
+
+    e.preventDefault();
+
+    setError("");
+
+    // Frontend validation
+    if (!validateForm()) {
+        return;
+    }
+
+    setLoading(true);
+
+    try {
+
+        const newStaff = await addStaff(formData);
+
+        console.log("STAFF CREATED:", newStaff);
+
+        if (onStaffAdded) {
+            onStaffAdded(newStaff);
+        }
+
+        onClose();
+
+    } catch (error) {
+
+        console.error("Error adding staff:", error);
+
+        if (error.response?.data) {
+            setError(
+                JSON.stringify(error.response.data)
+            );
+        } else {
+            setError(
+                "Failed to add staff. Please try again."
+            );
+        }
+
+    } finally {
+
+        setLoading(false);
+
+    }
+};
 
     return (
         <div className="add-staff-overlay">
@@ -128,6 +236,12 @@ function AddStaff({ onClose, onStaffAdded }) {
                             required
                         />
 
+                         {errors.name && (
+        <span className="field-error">
+            {errors.name}
+        </span>
+    )}
+
                     </div>
 
                     <div className="form-row">
@@ -144,6 +258,12 @@ function AddStaff({ onClose, onStaffAdded }) {
                                 onChange={handleChange}
                                 required
                             />
+
+                            {errors.date_of_birth && (
+    <span className="field-error">
+        {errors.date_of_birth}
+    </span>
+)}
 
                         </div>
 
@@ -196,6 +316,13 @@ function AddStaff({ onClose, onStaffAdded }) {
                                 required
                             />
 
+  {errors.phone && (
+        <span className="field-error">
+            {errors.phone}
+        </span>
+    )}
+
+
                         </div>
 
                         {/* Email */}
@@ -211,6 +338,12 @@ function AddStaff({ onClose, onStaffAdded }) {
                                 onChange={handleChange}
                                 required
                             />
+
+                              {errors.email && (
+        <span className="field-error">
+            {errors.email}
+        </span>
+    )}
 
                         </div>
 
@@ -277,6 +410,12 @@ function AddStaff({ onClose, onStaffAdded }) {
                             onChange={handleChange}
                         />
 
+                        {errors.qualification && (
+    <span className="field-error">
+        {errors.qualification}
+    </span>
+)}
+
                     </div>
 
                     {/* Blood Group */}
@@ -335,6 +474,12 @@ function AddStaff({ onClose, onStaffAdded }) {
                             onChange={handleChange}
                         />
 
+                        {errors.emergency_contact && (
+    <span className="field-error">
+        {errors.emergency_contact}
+    </span>
+)}
+
                     </div>
 
                     {/* Username */}
@@ -351,6 +496,12 @@ function AddStaff({ onClose, onStaffAdded }) {
                             required
                         />
 
+                        {errors.username && (
+    <span className="field-error">
+        {errors.username}
+    </span>
+)}
+
                     </div>
 
                     {/* Password */}
@@ -366,6 +517,12 @@ function AddStaff({ onClose, onStaffAdded }) {
                             onChange={handleChange}
                             required
                         />
+
+                        {errors.password && (
+    <span className="field-error">
+        {errors.password}
+    </span>
+)}
 
                     </div>
 

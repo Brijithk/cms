@@ -8,7 +8,14 @@ function Header() {
 
     const navigate = useNavigate();
 
+    const doctorName =
+        localStorage.getItem("userName") || "Doctor";
+
     const handleLogout = () => {
+
+        localStorage.removeItem("doctorId");
+        localStorage.removeItem("doctorName");
+
         navigate("/");
     };
 
@@ -24,9 +31,10 @@ function Header() {
                     className="hospital-logo"
                 />
 
-                <h2>City Care Hospital</h2>
+                <h2>Kims</h2>
 
             </div>
+
 
             {/* Right side */}
             <div className="header-right">
@@ -41,6 +49,7 @@ function Header() {
 
                 <div className="header-divider"></div>
 
+
                 {/* Profile */}
                 <img
                     src={profilePic}
@@ -49,7 +58,7 @@ function Header() {
                 />
 
                 <span className="user-name">
-                    Dr. John Doe
+                    Dr. {doctorName}
                 </span>
 
             </div>

@@ -1,8 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import "./MedicineDetailsPopup.css";
-
+import { updateMedicine } from "../../services/medicineService";
 function MedicineDetailsPopup({ medicine, onClose }) {
+      
 
+    const [restockQuantity, setRestockQuantity] = useState("");
+const [restocking, setRestocking] = useState(false);
     if (!medicine) {
         return null;
     }
@@ -59,7 +62,57 @@ function MedicineDetailsPopup({ medicine, onClose }) {
 
     const status = getStatus();
 
+         const handleRestock = async () => {
 
+    const quantity = Number(restockQuantity);
+
+    if (!quantity || quantity <= 0) {
+        alert("Please enter a valid quantity.");
+        return;
+    }
+
+    try {
+
+        setRestocking(true);
+
+        const currentStock = Number(
+            medicine.stock_quantity || 0
+        );
+
+        const updatedMedicine = await updateMedicine(
+            medicine.medicine_id,
+            {
+                ...medicine,
+                stock_quantity: currentStock + quantity
+            }
+        );
+                  console.log("MEDICINE OBJECT:", medicine);
+console.log("MEDICINE DB ID:", medicine.id);
+console.log("MEDICINE CUSTOM ID:", medicine.medicine_id);
+        alert(
+            `Medicine restocked successfully. Added ${quantity} units.`
+        );
+
+        setRestockQuantity("");
+
+        // Update the medicine object shown in the popup
+        Object.assign(medicine, updatedMedicine);
+
+    } catch (error) {
+
+        console.error(
+            "RESTOCK ERROR:",
+            error.response?.data || error
+        );
+
+        alert("Failed to restock medicine.");
+
+    } finally {
+
+        setRestocking(false);
+
+    }
+};
     return (
 
         <div className="medicine-details-overlay">
@@ -204,7 +257,37 @@ function MedicineDetailsPopup({ medicine, onClose }) {
                         </div>
 
                     </div>
+                             <div className="medicine-restock">
 
+    <label>
+        Restock Quantity
+    </label>
+
+    <div className="medicine-restock-controls">
+
+        <input
+            type="number"
+            min="1"
+            placeholder="Enter quantity"
+            value={restockQuantity}
+            onChange={(e) =>
+                setRestockQuantity(e.target.value)
+            }
+        />
+
+        <button
+            type="button"
+            onClick={handleRestock}
+            disabled={restocking}
+        >
+            {restocking
+                ? "Restocking..."
+                : "Restock"}
+        </button>
+
+    </div>
+
+</div>
                 </div>
 
 

@@ -6,7 +6,7 @@ function PharmacistWelcomeCard() {
         <div className="pharmacist-welcome-card">
 
             <div className="pharmacist-welcome-text">
-                <h2>Hello, Pharmacist John Doe</h2>
+                <h2>Hello, Pharmacist</h2>
                 <p>Welcome to your dashboard</p>
             </div>
 

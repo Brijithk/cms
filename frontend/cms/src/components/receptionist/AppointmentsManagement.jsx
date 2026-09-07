@@ -109,61 +109,110 @@ function AppointmentsManagement() {
 
 
     // Search + date filtering
-    const filteredAppointments =
-        appointments.filter((appointment) => {
+    // const filteredAppointments =
+    //     appointments.filter((appointment) => {
 
-            const search =
-                searchTerm
-                    .trim()
-                    .toLowerCase();
-
-
-            const matchesSearch =
-                !search ||
-
-                String(
-                    appointment.appointment_id || ""
-                )
-                    .toLowerCase()
-                    .includes(search) ||
-
-                String(
-                    appointment.patient_id || ""
-                )
-                    .toLowerCase()
-                    .includes(search) ||
-
-                String(
-                    appointment.reason || ""
-                )
-                    .toLowerCase()
-                    .includes(search) ||
-
-                String(
-                    appointment.doctor_id || ""
-                )
-                    .toLowerCase()
-                    .includes(search) ||
-
-                getDoctorName(
-                    appointment.doctor_id
-                )
-                    .toLowerCase()
-                    .includes(search);
+    //         const search =
+    //             searchTerm
+    //                 .trim()
+    //                 .toLowerCase();
 
 
-            const matchesDate =
-                !selectedDate ||
-                appointment.date === selectedDate;
+    //         const matchesSearch =
+    //             !search ||
+
+    //             String(
+    //                 appointment.appointment_id || ""
+    //             )
+    //                 .toLowerCase()
+    //                 .includes(search) ||
+
+    //             String(
+    //                 appointment.patient_id || ""
+    //             )
+    //                 .toLowerCase()
+    //                 .includes(search) ||
+
+    //             String(
+    //                 appointment.reason || ""
+    //             )
+    //                 .toLowerCase()
+    //                 .includes(search) ||
+
+    //             String(
+    //                 appointment.doctor_id || ""
+    //             )
+    //                 .toLowerCase()
+    //                 .includes(search) ||
+
+    //             getDoctorName(
+    //                 appointment.doctor_id
+    //             )
+    //                 .toLowerCase()
+    //                 .includes(search);
 
 
-            return (
-                matchesSearch &&
-                matchesDate
-            );
+    //         const matchesDate =
+    //             !selectedDate ||
+    //             appointment.date === selectedDate;
 
-        });
 
+    //         return (
+    //             matchesSearch &&
+    //             matchesDate
+    //         );
+
+    //     });
+    // Search + date filtering
+const today = new Date().toISOString().split("T")[0];
+
+const filteredAppointments =
+    appointments.filter((appointment) => {
+
+        const search =
+            searchTerm
+                .trim()
+                .toLowerCase();
+
+        const matchesSearch =
+            !search ||
+
+            String(appointment.appointment_id || "")
+                .toLowerCase()
+                .includes(search) ||
+
+            String(appointment.patient_id || "")
+                .toLowerCase()
+                .includes(search) ||
+
+            String(appointment.reason || "")
+                .toLowerCase()
+                .includes(search) ||
+
+            String(appointment.doctor_id || "")
+                .toLowerCase()
+                .includes(search) ||
+
+            getDoctorName(appointment.doctor_id)
+                .toLowerCase()
+                .includes(search);
+
+        // Show only today and future appointments
+        const matchesFromToday =
+            appointment.date >= today;
+
+        // If user selects a date, apply that filter too
+        const matchesSelectedDate =
+            !selectedDate ||
+            appointment.date === selectedDate;
+
+        return (
+            matchesSearch &&
+            matchesFromToday &&
+            matchesSelectedDate
+        );
+
+    });
 
     // View appointment
     const handleView = (appointment) => {
@@ -326,9 +375,7 @@ function AppointmentsManagement() {
                                     Time
                                 </th>
 
-                                <th>
-                                    Token
-                                </th>
+                               
 
                                 <th>
                                     Action
@@ -348,7 +395,7 @@ function AppointmentsManagement() {
 
                                         <tr
                                             key={
-                                                appointment.id
+                                                 appointment.appointment_id
                                             }
                                         >
 
@@ -367,7 +414,7 @@ function AppointmentsManagement() {
 
                                             {/* Patient */}
 
-                                            <td>
+                                            {/* <td>
 
                                                 <div className="patient-cell">
 
@@ -401,7 +448,33 @@ function AppointmentsManagement() {
 
                                                 </div>
 
-                                            </td>
+                                            </td> */}
+
+                                            {/* Patient */}
+
+<td>
+
+    <div className="patient-cell">
+
+        <div className="patient-avatar">
+
+            {getPatientName(
+                appointment.patient_id
+            )
+                .charAt(0)
+                .toUpperCase()}
+
+        </div>
+
+        <strong>
+            {getPatientName(
+                appointment.patient_id
+            )}
+        </strong>
+
+    </div>
+
+</td>
 
 
                                             {/* Doctor */}
@@ -447,7 +520,7 @@ function AppointmentsManagement() {
 
 
                                             {/* Token */}
-
+{/* 
                                             <td>
 
                                                 <span className="token-badge">
@@ -457,7 +530,7 @@ function AppointmentsManagement() {
 
                                                 </span>
 
-                                            </td>
+                                            </td> */}
 
 
                                             {/* Action */}
@@ -487,7 +560,7 @@ function AppointmentsManagement() {
                                 <tr>
 
                                     <td
-                                        colSpan="6"
+                                        colSpan="5"
                                         className="no-appointments"
                                     >
 

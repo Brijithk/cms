@@ -2,7 +2,7 @@
 # from django.http import JsonResponse
 from doctor.models import Consultation,PrescribedLab,Doctor,PrescribedMedicine
 from receptionist.models import Patient ,Appointment,AppointmentBill
-from .serializers import AppointmentBillSerializer,LabBillSerializer,DepartmentSerializer,BillSerializer,PrescribedMedicineSerializer,LabTestSerializer,MedicineSerializer,AppointmentSerializer,ConsultationSerializer,UserSerializer,PrescribedLabSerializer,PatientSerializer, StaffSerializer,DoctorSerializer
+from .serializers import PatientHistorySerializer,AppointmentBillSerializer,LabBillSerializer,DepartmentSerializer,BillSerializer,PrescribedMedicineSerializer,LabTestSerializer,MedicineSerializer,AppointmentSerializer,ConsultationSerializer,UserSerializer,PrescribedLabSerializer,PatientSerializer, StaffSerializer,DoctorSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -12,6 +12,7 @@ from django.http import Http404
 from rest_framework import mixins,generics
 from doctor.models import Consultation,Bill,LabBill
 from rest_framework import viewsets
+from django.db import transaction
 # Create your views here.
 
 @api_view(['GET','POST'])
@@ -148,6 +149,53 @@ class DoctorDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     serializer_class = DoctorSerializer
 
+# class LoginView(APIView):
+
+#     def post(self, request):
+
+#         username = request.data.get("username")
+#         password = request.data.get("password")
+
+#         # Check Doctor
+#         try:
+#             doctor = Doctor.objects.get(username=username)
+
+#             if doctor.password == password:
+
+#                 return Response({
+#                     "id": doctor.id,
+#                     "name": doctor.name,
+#                     "role": "doctor",
+#                     "doctor_id": doctor.doctor_id
+#                 })
+
+#         except Doctor.DoesNotExist:
+#             pass
+
+
+#         # Check Staff
+#         try:
+#             staff = Staff.objects.get(username=username)
+#             staff = Staff.objects.get(username=username,is_active=True)
+
+#             if staff.password == password:
+
+#                 return Response({
+#                     "id": staff.id,
+#                     "name": staff.name,
+#                     "role": staff.department.lower(),
+#                     "staff_id": staff.staff_id
+#                 })
+
+#         except Staff.DoesNotExist:
+#             pass
+
+
+#         return Response(
+#             {"message": "Invalid username or password"},
+#             status=401
+#         )
+
 class LoginView(APIView):
 
     def post(self, request):
@@ -168,14 +216,21 @@ class LoginView(APIView):
                     "doctor_id": doctor.doctor_id
                 })
 
+            return Response(
+                {"message": "Invalid username or password"},
+                status=401
+            )
+
         except Doctor.DoesNotExist:
             pass
 
 
         # Check Staff
         try:
-            staff = Staff.objects.get(username=username)
-            staff = Staff.objects.get(username=username,is_active=True)
+            staff = Staff.objects.get(
+                username=username,
+                is_active=True
+            )
 
             if staff.password == password:
 
@@ -185,6 +240,11 @@ class LoginView(APIView):
                     "role": staff.department.lower(),
                     "staff_id": staff.staff_id
                 })
+
+            return Response(
+                {"message": "Invalid username or password"},
+                status=401
+            )
 
         except Staff.DoesNotExist:
             pass
@@ -350,11 +410,122 @@ class PrescribedMedicineByConsultationView(generics.ListAPIView):
         )
 
 
+# class BillListCreateView(generics.ListCreateAPIView):
+
+#     queryset = Bill.objects.all()
+#     serializer_class = BillSerializer
 class BillListCreateView(generics.ListCreateAPIView):
 
     queryset = Bill.objects.all()
     serializer_class = BillSerializer
 
+    @transaction.atomic
+    def create(self, request, *args, **kwargs):
+
+        consultation_id = request.data.get("consultation_id")
+        patient_id = request.data.get("patient_id")
+        payment_method = request.data.get("payment_method")
+
+        if not consultation_id:
+            return Response(
+                {"error": "consultation_id is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not payment_method:
+            return Response(
+                {"error": "payment_method is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Get prescribed medicines
+        medicines = PrescribedMedicine.objects.filter(
+            consultation_id=consultation_id,
+            status="pending"
+        )
+
+        if not medicines.exists():
+            return Response(
+                {"error": "No pending medicines found."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Check stock first
+        for prescribed in medicines:
+
+            try:
+                medicine = Medicine.objects.get(
+                    medicine_id=prescribed.medicine_id
+                )
+            except Medicine.DoesNotExist:
+                return Response(
+                    {
+                        "error":
+                        f"Medicine {prescribed.medicine_id} not found."
+                    },
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            if medicine.stock_quantity < prescribed.quantity:
+                return Response(
+                    {
+                        "error":
+                        f"Insufficient stock for "
+                        f"{medicine.medicine_name}. "
+                        f"Available: {medicine.stock_quantity}, "
+                        f"Required: {prescribed.quantity}"
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        # Calculate total from database
+        total_amount = 0
+
+        for prescribed in medicines:
+
+            medicine = Medicine.objects.get(
+                medicine_id=prescribed.medicine_id
+            )
+
+            total_amount += (
+                medicine.price_per_unit *
+                prescribed.quantity
+            )
+
+        # Create bill
+        bill = Bill.objects.create(
+            consultation_id=consultation_id,
+            patient_id=patient_id,
+            amount=total_amount,
+            payment_status="paid",
+            payment_method=payment_method
+        )
+
+        # Reduce stock + mark completed
+        for prescribed in medicines:
+
+            medicine = Medicine.objects.get(
+                medicine_id=prescribed.medicine_id
+            )
+
+            medicine.stock_quantity -= prescribed.quantity
+
+            medicine.save(
+                update_fields=["stock_quantity"]
+            )
+
+            prescribed.status = "completed"
+
+            prescribed.save(
+                update_fields=["status"]
+            )
+
+        serializer = self.get_serializer(bill)
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
 
 class BillDetailView(generics.RetrieveAPIView):
 
@@ -493,3 +664,34 @@ class AppointmentBillViewSet(viewsets.ModelViewSet):
     queryset = AppointmentBill.objects.all().order_by("-bill_date")
 
     serializer_class = AppointmentBillSerializer
+
+class PatientHistoryView(APIView):
+
+    def get(self, request, patient_id):
+
+        print("PATIENT HISTORY REQUEST:", patient_id)
+
+        patient_exists = Patient.objects.filter(
+            patient_id=patient_id
+        ).exists()
+
+        print("PATIENT EXISTS:", patient_exists)
+
+        if not patient_exists:
+
+            return Response(
+                {
+                    "detail": "Patient not found.",
+                    "patient_id": patient_id
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = PatientHistorySerializer(
+            patient_id
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )

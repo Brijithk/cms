@@ -135,7 +135,7 @@ function PatientList() {
                                 <th>Age</th>
                                 <th>Gender</th>
                                 <th>Phone</th>
-                                <th>Last Visit</th>
+                                {/* <th>Last Visit</th> */}
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -172,9 +172,7 @@ function PatientList() {
                                             {patient.phone}
                                         </td>
 
-                                        <td>
-                                            -
-                                        </td>
+                                        
 
                                         <td>
 
@@ -212,7 +210,7 @@ function PatientList() {
                                 <tr>
 
                                     <td
-                                        colSpan="8"
+                                        colSpan="7"
                                         style={{
                                             textAlign: "center",
                                             padding: "25px"
