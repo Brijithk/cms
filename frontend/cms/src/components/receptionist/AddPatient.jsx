@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./AddPatient.css";
 import { addPatient } from "../../services/patientService";
 import RegistrationPaymentPopup from "./RegistrationPaymentPopup";
+import AddAppointment from "./AddAppointment";
 function AddPatient({ onClose, onPatientAdded }) {
 
     const [formData, setFormData] = useState({
@@ -18,9 +19,10 @@ function AddPatient({ onClose, onPatientAdded }) {
 
     const [showPaymentPopup, setShowPaymentPopup] = useState(false);
 const [createdPatient, setCreatedPatient] = useState(null);
-
+   const [selectedPatient, setSelectedPatient] = useState(null);
+const [showAppointment, setShowAppointment] = useState(false);
     const [errors, setErrors] = useState({});
-
+  const today = new Date().toISOString().split("T")[0];
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -60,10 +62,10 @@ const validateForm = () => {
 
         today.setHours(0, 0, 0, 0);
 
-        if (selectedDate > today) {
-            newErrors.dateOfBirth =
-                "Date of birth cannot be in the future";
-        }
+        // if (selectedDate > today) {
+        //     newErrors.dateOfBirth =
+        //         "Date of birth cannot be in the future";
+        // }
     }
 
     // Gender
@@ -282,13 +284,22 @@ setShowPaymentPopup(true);
 
                             <label>Date of Birth</label>
 
-                            <input
+                            {/* <input
                                 type="date"
                                 name="dateOfBirth"
                                 value={formData.dateOfBirth}
                                 onChange={handleChange}
                                 required
-                            />
+                            /> */}
+
+                            <input
+    type="date"
+    name="dateOfBirth"
+    value={formData.dateOfBirth}
+    onChange={handleChange}
+    max={today}
+    required
+/>
 
                             {errors.dateOfBirth && (
     <span className="field-error">
@@ -486,13 +497,14 @@ setShowPaymentPopup(true);
                 </form>
 
             </div>
-          {showPaymentPopup && createdPatient && (
+        {showPaymentPopup && createdPatient && (
     <RegistrationPaymentPopup
         patient={createdPatient}
+
         onClose={() => {
             setShowPaymentPopup(false);
-            setCreatedPatient(null);
         }}
+
         onPaymentCompleted={() => {
 
             if (onPatientAdded) {
@@ -503,6 +515,40 @@ setShowPaymentPopup(true);
             setCreatedPatient(null);
             onClose();
 
+        }}
+
+        onAddAppointment={(patient) => {
+
+            // Close payment/receipt popup
+            setShowPaymentPopup(false);
+
+            // Select newly created patient
+            setSelectedPatient(patient);
+
+            // Open appointment popup
+            setShowAppointment(true);
+
+        }}
+    />
+)}
+{showAppointment && selectedPatient && (
+    <AddAppointment
+        patient={selectedPatient}
+
+        onClose={() => {
+            setShowAppointment(false);
+            setSelectedPatient(null);
+        }}
+
+        onAppointmentBooked={(appointment) => {
+
+            console.log(
+                "Appointment booked:",
+                appointment
+            );
+
+            setShowAppointment(false);
+            setSelectedPatient(null);
         }}
     />
 )}

@@ -8,11 +8,15 @@ function ReceptionistLayout() {
     return (
         <div className="receptionist-layout">
 
-            <ReceptionistHeader />
+            <div className="receptionist-fixed-header">
+                <ReceptionistHeader />
+            </div>
 
             <div className="receptionist-layout-body">
 
-                <ReceptionistSidebar />
+                <div className="receptionist-fixed-sidebar">
+                    <ReceptionistSidebar />
+                </div>
 
                 <main className="receptionist-main-content">
                     <Outlet />
@@ -25,3 +29,5 @@ function ReceptionistLayout() {
 }
 
 export default ReceptionistLayout;
+
+// export default ReceptionistLayout;

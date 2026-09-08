@@ -341,3 +341,98 @@
     }
 
 }
+
+
+/* ============================= */
+/* PRINT BILL */
+/* ============================= */
+
+@media print {
+
+    /* Hide everything on the page */
+    body * {
+        visibility: hidden;
+    }
+
+    /* Show only the bill */
+    .appointment-bill-popup,
+    .appointment-bill-popup * {
+        visibility: visible;
+    }
+
+    /* Remove overlay from printed layout */
+    .appointment-bill-overlay {
+        position: static;
+        inset: auto;
+        background: none;
+        padding: 0;
+        display: block;
+    }
+
+    /* Bill itself */
+    .appointment-bill-popup {
+        position: absolute;
+        left: 0;
+        top: 0;
+
+        width: 100%;
+        max-width: none;
+        max-height: none;
+
+        margin: 0;
+        padding: 0;
+
+        border-radius: 0;
+        box-shadow: none;
+
+        overflow: visible;
+    }
+
+    /* Hide close button */
+    .appointment-bill-close {
+        display: none;
+    }
+
+    /* Hide action buttons */
+    .appointment-bill-actions {
+        display: none;
+    }
+
+    /* Make footer visible */
+    .appointment-bill-footer {
+        display: flex;
+    }
+
+    /* Better print spacing */
+    .appointment-bill-header {
+        padding: 20px 25px;
+    }
+
+    .appointment-bill-section {
+        padding: 18px 25px;
+    }
+
+    .appointment-bill-payment {
+        padding: 18px 25px;
+    }
+
+    .appointment-bill-meta {
+        padding: 15px 25px;
+    }
+
+    /* Prevent sections from splitting */
+    .appointment-bill-header,
+    .appointment-bill-meta,
+    .appointment-bill-section,
+    .appointment-bill-payment,
+    .appointment-bill-footer {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    /* Remove unnecessary page margins */
+    @page {
+        size: A4;
+        margin: 15mm;
+    }
+}

@@ -4,6 +4,7 @@ import "./PatientTable.css";
 import { getAppointments } from "../../services/appointmentService";
 import ConsultationPopup from "./ConsultationPopup";
 import { getConsultationByAppointment } from "../../services/consultationService";
+import { getPatients } from "../../services/patientService";
 function PatientTable() {
 
     const [showFilter, setShowFilter] = useState(false);
@@ -15,6 +16,7 @@ function PatientTable() {
     const [showConsultation, setShowConsultation] = useState(false);
     const [selectedConsultation, setSelectedConsultation] = useState(null);
 const [loadingConsultation, setLoadingConsultation] = useState(false);
+const [patients, setPatients] = useState([]);
 
     // useEffect(() => {
 
@@ -90,12 +92,20 @@ const [loadingConsultation, setLoadingConsultation] = useState(false);
             }
 
 
-            const data = await getAppointments();
+            const [appointmentData, patientData] = await Promise.all([
+    getAppointments(),
+    getPatients()
+]);
 
-            console.log(
-                "ALL APPOINTMENTS:",
-                data
-            );
+           console.log(
+    "ALL APPOINTMENTS:",
+    appointmentData
+);
+
+console.log(
+    "ALL PATIENTS:",
+    patientData
+);
 
 
             // Get today's date: YYYY-MM-DD
@@ -118,7 +128,7 @@ const [loadingConsultation, setLoadingConsultation] = useState(false);
             // Only today's appointments
             // belonging to the logged-in doctor
             const doctorAppointments =
-                data.filter(
+                appointmentData.filter(
                     (appointment) =>
                         String(
                             appointment.doctor_id
@@ -137,6 +147,12 @@ const [loadingConsultation, setLoadingConsultation] = useState(false);
             setAppointments(
                 doctorAppointments
             );
+
+            setPatients(
+    Array.isArray(patientData)
+        ? patientData
+        : []
+);
 
 
         } catch (error) {
@@ -159,6 +175,17 @@ const [loadingConsultation, setLoadingConsultation] = useState(false);
 
 }, []);
 
+const getPatientName = (patientId) => {
+
+    const patient = patients.find(
+        (patient) =>
+            String(patient.patient_id) ===
+            String(patientId)
+    );
+
+    return patient?.full_name || "-";
+};
+
 
     const filteredAppointments = appointments.filter(
         (appointment) => {
@@ -171,13 +198,17 @@ const [loadingConsultation, setLoadingConsultation] = useState(false);
                 searchTerm.toLowerCase();
 
             const matchesSearch =
-                String(appointment.patient_id)
-                    .toLowerCase()
-                    .includes(search) ||
+    String(appointment.patient_id)
+        .toLowerCase()
+        .includes(search) ||
 
-                String(appointment.reason)
-                    .toLowerCase()
-                    .includes(search);
+    getPatientName(appointment.patient_id)
+        .toLowerCase()
+        .includes(search) ||
+
+    String(appointment.reason)
+        .toLowerCase()
+        .includes(search);
 
             return matchesStatus && matchesSearch;
         }
@@ -346,7 +377,7 @@ const [loadingConsultation, setLoadingConsultation] = useState(false);
 
                             <tr>
                                 <th>Appointment ID</th>
-                                <th>Patient ID</th>
+                                <th>Patient Name</th>
                                 <th>Token</th>
                                 <th>Date</th>
                                 <th>Time</th>
@@ -378,10 +409,9 @@ const [loadingConsultation, setLoadingConsultation] = useState(false);
                                             </td>
 
                                             <td>
-                                                P
-                                                {String(
-                                                    appointment.patient_id
-                                                ).padStart(3, "0")}
+                                              {getPatientName(
+        appointment.patient_id
+    )}
                                             </td>
 
                                             <td>

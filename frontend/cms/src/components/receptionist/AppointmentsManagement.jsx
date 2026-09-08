@@ -166,6 +166,54 @@ function AppointmentsManagement() {
     // Search + date filtering
 const today = new Date().toISOString().split("T")[0];
 
+// const filteredAppointments =
+//     appointments.filter((appointment) => {
+
+//         const search =
+//             searchTerm
+//                 .trim()
+//                 .toLowerCase();
+
+//         const matchesSearch =
+//             !search ||
+
+//             String(appointment.appointment_id || "")
+//                 .toLowerCase()
+//                 .includes(search) ||
+
+//             String(appointment.patient_id || "")
+//                 .toLowerCase()
+//                 .includes(search) ||
+
+//             String(appointment.reason || "")
+//                 .toLowerCase()
+//                 .includes(search) ||
+
+//             String(appointment.doctor_id || "")
+//                 .toLowerCase()
+//                 .includes(search) ||
+
+//             getDoctorName(appointment.doctor_id)
+//                 .toLowerCase()
+//                 .includes(search);
+
+//         // Show only today and future appointments
+//         const matchesFromToday =
+//             appointment.date >= today;
+
+//         // If user selects a date, apply that filter too
+//         const matchesSelectedDate =
+//             !selectedDate ||
+//             appointment.date === selectedDate;
+
+//         return (
+//             matchesSearch &&
+//             matchesFromToday &&
+//             matchesSelectedDate
+//         );
+
+//     });
+       
 const filteredAppointments =
     appointments.filter((appointment) => {
 
@@ -174,34 +222,57 @@ const filteredAppointments =
                 .trim()
                 .toLowerCase();
 
+        const patientName =
+            getPatientName(
+                appointment.patient_id
+            ).toLowerCase();
+
+        const patientId =
+            String(
+                appointment.patient_id || ""
+            ).toLowerCase();
+
+        const formattedPatientId =
+            `p${String(
+                appointment.patient_id || ""
+            ).padStart(3, "0")}`;
+
         const matchesSearch =
             !search ||
 
-            String(appointment.appointment_id || "")
+            String(
+                appointment.appointment_id || ""
+            )
                 .toLowerCase()
                 .includes(search) ||
 
-            String(appointment.patient_id || "")
+            patientId.includes(search) ||
+
+            formattedPatientId.includes(search) ||
+
+            patientName.includes(search) ||
+
+            String(
+                appointment.reason || ""
+            )
                 .toLowerCase()
                 .includes(search) ||
 
-            String(appointment.reason || "")
+            String(
+                appointment.doctor_id || ""
+            )
                 .toLowerCase()
                 .includes(search) ||
 
-            String(appointment.doctor_id || "")
-                .toLowerCase()
-                .includes(search) ||
-
-            getDoctorName(appointment.doctor_id)
+            getDoctorName(
+                appointment.doctor_id
+            )
                 .toLowerCase()
                 .includes(search);
 
-        // Show only today and future appointments
         const matchesFromToday =
             appointment.date >= today;
 
-        // If user selects a date, apply that filter too
         const matchesSelectedDate =
             !selectedDate ||
             appointment.date === selectedDate;

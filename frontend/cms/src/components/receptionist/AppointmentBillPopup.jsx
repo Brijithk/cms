@@ -57,7 +57,7 @@ function AppointmentBillPopup({ bill, onClose }) {
                     <div className="hospital-info">
 
                         <h1>
-                            Clinical Management System
+                           Kims
                         </h1>
 
                         <p>

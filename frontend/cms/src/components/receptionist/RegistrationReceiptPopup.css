@@ -222,3 +222,83 @@
 
     color: white;
 }
+
+/* ============================= */
+/* PRINT STYLES */
+/* ============================= */
+
+@media print {
+
+    /* Hide everything by default */
+    body * {
+        visibility: hidden;
+    }
+
+    /* Show only receipt */
+    .receipt-overlay,
+    .receipt-card,
+    .receipt-card * {
+        visibility: visible;
+    }
+
+    /* Remove overlay background */
+    .receipt-overlay {
+        position: absolute;
+        inset: 0;
+
+        background: none;
+
+        display: block;
+
+        width: 100%;
+        height: auto;
+
+        z-index: auto;
+    }
+
+    /* Receipt itself */
+    .receipt-card {
+        position: absolute;
+
+        left: 0;
+        top: 0;
+
+        width: 100%;
+        max-width: none;
+
+        max-height: none;
+
+        overflow: visible;
+
+        margin: 0;
+
+        padding: 25px;
+
+        border-radius: 0;
+
+        box-shadow: none;
+    }
+
+    /* Hide buttons while printing */
+    .receipt-actions,
+    .receipt-close-button {
+        display: none !important;
+    }
+
+    /* Prevent unnecessary page breaks */
+    .receipt-card {
+        page-break-inside: avoid;
+    }
+
+    .receipt-patient,
+    .receipt-payment,
+    .receipt-meta {
+        page-break-inside: avoid;
+    }
+
+}
+
+@page {
+    size: A4;
+    margin: 15mm;
+}

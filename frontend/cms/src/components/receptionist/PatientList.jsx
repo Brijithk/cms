@@ -59,24 +59,40 @@ function PatientList() {
         return age;
     };
 
+    // const filteredPatients = patients.filter((patient) => {
+
+    //     const search = searchTerm.toLowerCase();
+
+    //     return (
+    //         String(patient.patient_id)
+    //             .toLowerCase()
+    //             .includes(search) ||
+
+    //         String(patient.full_name)
+    //             .toLowerCase()
+    //             .includes(search) ||
+
+    //         String(patient.phone)
+    //             .toLowerCase()
+    //             .includes(search)
+    //     );
+    // });
+
     const filteredPatients = patients.filter((patient) => {
 
-        const search = searchTerm.toLowerCase();
+    const search = searchTerm.trim().toLowerCase();
 
-        return (
-            String(patient.patient_id)
-                .toLowerCase()
-                .includes(search) ||
+    const patientId = `P${String(patient.patient_id).padStart(3, "0")}`;
+    const patientName = String(patient.full_name || "").toLowerCase();
 
-            String(patient.full_name)
-                .toLowerCase()
-                .includes(search) ||
-
-            String(patient.phone)
-                .toLowerCase()
-                .includes(search)
-        );
-    });
+    return (
+        patientId.toLowerCase().includes(search) ||
+        String(patient.patient_id)
+            .toLowerCase()
+            .includes(search) ||
+        patientName.includes(search)
+    );
+});
 
     const handleViewPatient = (patient) => {
         console.log("View patient:", patient);
